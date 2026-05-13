@@ -5,6 +5,7 @@ from Generators.current import generate_mcq_current
 from Generators.forces import generate_mcq_forces
 from Generators.projectiles import generate_projectile_mcqs
 from Generators.vectors2 import generate_mcq_vectors
+from Generators.gas_laws import generate_gas_law_mcqs
 
 
 # =========================================================
@@ -31,6 +32,11 @@ units = {
 
         "Current Questions":
             generate_mcq_current
+    },
+    
+    "Properties of Matter": {
+        "Gas Law Questions":
+            generate_gas_law_mcqs
     }
 }
 
