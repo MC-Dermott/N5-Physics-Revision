@@ -123,7 +123,7 @@ def generate_current_question():
 
         {
             "value": correct_val,
-            "summary": "Correct! You used I = Q / t.",
+            "summary": "Correct!",
             "mistake": None,
             "working": working
         },
@@ -131,21 +131,21 @@ def generate_current_question():
         {
             "value": charge * time_sec,
             "summary": "Incorrect.",
-            "mistake": "You multiplied instead of dividing.",
+            "mistake": "You rearranged Q= It incorrectly.",
             "working": working
         },
 
         {
             "value": round(time_sec / charge, 2),
             "summary": "Incorrect.",
-            "mistake": "You inverted the formula.",
+            "mistake": "You rearranged Q= It incorrectly.",
             "working": working
         },
 
         {
             "value": conversion_distractor,
             "summary": "Incorrect.",
-            "mistake": "You did not convert time into seconds.",
+            "mistake": "You didn't convert time into seconds.",
             "working": working
         }
     ]
@@ -193,7 +193,7 @@ def generate_charge_question():
 
         {
             "value": correct_val,
-            "summary": "Correct! You used Q = I × t.",
+            "summary": "Correct!",
             "mistake": None,
             "working": working
         },
@@ -201,14 +201,14 @@ def generate_charge_question():
         {
             "value": round(current / time_sec, 2),
             "summary": "Incorrect.",
-            "mistake": "You used division instead of multiplication.",
+            "mistake": "You rearranged Q= It incorrectly.",
             "working": working
         },
 
         {
             "value": round(time_sec / current, 2),
             "summary": "Incorrect.",
-            "mistake": "You rearranged the equation incorrectly.",
+            "mistake": "You rearranged Q= It incorrectly.",
             "working": working
         },
 
@@ -252,7 +252,7 @@ def generate_time_question():
 
         {
             "value": correct_val,
-            "summary": "Correct! You used t = Q / I.",
+            "summary": "Correct!",
             "mistake": None,
             "working": working
         },
@@ -260,14 +260,14 @@ def generate_time_question():
         {
             "value": charge * current,
             "summary": "Incorrect.",
-            "mistake": "You multiplied instead of dividing.",
+            "mistake": "You rearranged Q= It incorrectly.",
             "working": working
         },
 
         {
             "value": round(current / charge, 2),
             "summary": "Incorrect.",
-            "mistake": "You inverted the formula.",
+            "mistake": "You rearranged Q= It incorrectly.",
             "working": working
         },
 

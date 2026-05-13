@@ -30,9 +30,9 @@ def range_working(v, t, answer):
 
     return [
         {"type": "text", "content": "Horizontal motion: velocity is constant"},
-        {"type": "latex", "content": r"R = v_x t"},
-        {"type": "latex", "content": rf"R = {v} \times {t}"},
-        {"type": "latex", "content": rf"R = {answer}\ \mathrm{{m}}"}
+        {"type": "latex", "content": r"s_H = v_H t"},
+        {"type": "latex", "content": rf"s_H = {v} \times {t}"},
+        {"type": "latex", "content": rf"s_H = {answer}\ \mathrm{{m}}"}
     ]
 
 
@@ -40,18 +40,18 @@ def vertical_velocity_working(t, answer):
 
     return [
         {"type": "text", "content": "Vertical motion under gravity"},
-        {"type": "latex", "content": r"v_y = gt"},
-        {"type": "latex", "content": rf"v_y = 9.8 \times {t}"},
-        {"type": "latex", "content": rf"v_y = {answer}\ \mathrm{{m/s}}"}
+        {"type": "latex", "content": r"v_v = u_v + a_v t"},
+        {"type": "latex", "content": rf"v_v = 0 + 9.8 \times {t}"},
+        {"type": "latex", "content": rf"v_v = {answer}\ \mathrm{{m/s}}"}
     ]
 
 
 def height_working(t, answer):
 
     return [
-        {"type": "text", "content": "Use SUVAT equation for vertical motion"},
-        {"type": "latex", "content": r"s = \frac{1}{2}gt^2"},
-        {"type": "latex", "content": rf"s = 0.5 \times 9.8 \times {t}^2"},
+        {"type": "text", "content": "Sketch v-t graph and find area under curve."},
+        {"type": "latex", "content": r"s = \text{area under curve}"},
+        {"type": "latex", "content": rf"s = \frac{1}{2} \times {t} \times {round(g * t, 2)}"},
         {"type": "latex", "content": rf"s = {answer}\ \mathrm{{m}}"}
     ]
 
@@ -76,14 +76,14 @@ def generate_mcq_range(s):
         [
             {
                 "value": correct,
-                "summary": "Correct! You used R = vt.",
+                "summary": "Correct!",
                 "mistake": None,
                 "working": working
             },
             {
                 "value": round(s["u_x"] * g, 2),
                 "summary": "Incorrect.",
-                "mistake": "You used gravity instead of time.",
+                "mistake": "You substituted the wrong numbers into s = vt.",
                 "working": working
             },
             {
@@ -95,7 +95,7 @@ def generate_mcq_range(s):
             {
                 "value": round(s["u_x"] + s["t"], 2),
                 "summary": "Incorrect.",
-                "mistake": "You added instead of multiplying.",
+                "mistake": "You used the wrong equation.",
                 "working": working
             }
         ],
@@ -119,14 +119,14 @@ def generate_mcq_vertical_velocity(s):
         [
             {
                 "value": correct,
-                "summary": "Correct! You used v = gt.",
+                "summary": "Correct!",
                 "mistake": None,
                 "working": working
             },
             {
-                "value": s["u_x"],
+                "value": round(s["u_x"]+g*s["t"],2),
                 "summary": "Incorrect.",
-                "mistake": "This is horizontal velocity.",
+                "mistake": "You have used the initial HORIZONTAL velocity instead of the initial VERTICAL velocity (0).",
                 "working": working
             },
             {

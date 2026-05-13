@@ -115,7 +115,7 @@ def generate_acceleration_question():
             "value": correct_val,
 
             "summary":
-                "Correct! You used Newton's Second Law.",
+                "Correct!",
 
             "mistake": None,
 
@@ -129,8 +129,7 @@ def generate_acceleration_question():
                 "Incorrect.",
 
             "mistake":
-                "You multiplied force and mass "
-                "instead of dividing.",
+                "You incorrectly rearranged F = ma.",
 
             "working": working
         },
@@ -142,8 +141,7 @@ def generate_acceleration_question():
                 "Incorrect.",
 
             "mistake":
-                "You added the values instead of "
-                "using the formula.",
+                "You used the formula incorectly.",
 
             "working": working
         },
@@ -155,7 +153,7 @@ def generate_acceleration_question():
                 "Incorrect.",
 
             "mistake":
-                "You inverted the formula.",
+                "You incorrectly rearranged F = ma.",
 
             "working": working
         }
@@ -200,7 +198,7 @@ def generate_mass_question():
             "value": correct_val,
 
             "summary":
-                "Correct! You rearranged the formula correctly.",
+                "Correct!",
 
             "mistake": None,
 
@@ -214,7 +212,7 @@ def generate_mass_question():
                 "Incorrect.",
 
             "mistake":
-                "You multiplied instead of dividing.",
+                "You incorrectly rearranged F = ma.",
 
             "working": working
         },
@@ -226,8 +224,7 @@ def generate_mass_question():
                 "Incorrect.",
 
             "mistake":
-                "You added the values instead of "
-                "using the formula.",
+                "You used F = ma incorrectly.",
 
             "working": working
         },
@@ -239,7 +236,7 @@ def generate_mass_question():
                 "Incorrect.",
 
             "mistake":
-                "You inverted the formula.",
+                "You incorrectly rearranged F = ma.",
 
             "working": working
         }
@@ -284,7 +281,7 @@ def generate_force_question():
             "value": correct_val,
 
             "summary":
-                "Correct! You used F = ma.",
+                "Correct! ",
 
             "mistake": None,
 
@@ -298,8 +295,7 @@ def generate_force_question():
                 "Incorrect.",
 
             "mistake":
-                "You added the values instead "
-                "of multiplying.",
+                "You used F =ma incorrectly.",
 
             "working": working
         },
@@ -323,7 +319,7 @@ def generate_force_question():
                 "Incorrect.",
 
             "mistake":
-                "You divided instead of multiplying.",
+                "You rearranged F = ma incorrectly",
 
             "working": working
         }

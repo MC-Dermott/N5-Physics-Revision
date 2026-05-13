@@ -155,26 +155,26 @@ def generate_missing_friction():
     options_data = [
         {
             "value": correct_val,
-            "summary": "Correct! You used resultant force first.",
+            "summary": "Correct!",
             "mistake": None,
             "working": working
         },
         {
             "value": resultant,
             "summary": "Incorrect.",
-            "mistake": "This is only the resultant force, not friction.",
+            "mistake": "You've calculated the unbalanced force, not the friction.",
             "working": working
         },
         {
             "value": driving_force + resultant,
             "summary": "Incorrect.",
-            "mistake": "You added forces instead of subtracting.",
+            "mistake": "You used the unbalanced force incorrectly. Remember, friction is equal to the unabalanced force take away the driving force.",
             "working": working
         },
         {
             "value": resultant - driving_force,
             "summary": "Incorrect.",
-            "mistake": "You reversed the subtraction.",
+            "mistake": "You used the unbalanced force incorrectly. Remember, friction is equal to the unabalanced force take away the driving force.",
             "working": working
         }
     ]
@@ -209,20 +209,20 @@ def generate_missing_driving():
     options_data = [
         {
             "value": correct_val,
-            "summary": "Correct! You added friction to resultant force.",
+            "summary": "Correct!",
             "mistake": None,
             "working": working
         },
         {
             "value": resultant,
             "summary": "Incorrect.",
-            "mistake": "You ignored friction.",
+            "mistake": "Remember, the driving force is the unbalanced force PLUS friction.",
             "working": working
         },
         {
             "value": friction_force - resultant,
             "summary": "Incorrect.",
-            "mistake": "Wrong rearrangement.",
+            "mistake": "Remember, the driving force is the unbalanced force PLUS friction.",
             "working": working
         },
         {
@@ -263,26 +263,26 @@ def generate_missing_acceleration():
     options_data = [
         {
             "value": correct_val,
-            "summary": "Correct! You found resultant force first.",
+            "summary": "Correct!",
             "mistake": None,
             "working": working
         },
         {
             "value": round(driving_force / mass, 2),
             "summary": "Incorrect.",
-            "mistake": "You ignored friction.",
+            "mistake": "Remember, you need to work out the unbalanced force first!",
             "working": working
         },
         {
             "value": round(friction_force / mass, 2),
             "summary": "Incorrect.",
-            "mistake": "You used friction instead of resultant force.",
+            "mistake": "YRemember, you need to work out the unbalanced force first!",
             "working": working
         },
         {
             "value": round((driving_force + friction_force) / mass, 2),
             "summary": "Incorrect.",
-            "mistake": "You added forces instead of subtracting.",
+            "mistake": "Remember, the unbalanced force is the DIFFERENCE between the driving force and friction.",
             "working": working
         }
     ]

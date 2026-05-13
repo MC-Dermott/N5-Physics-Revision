@@ -8,31 +8,72 @@ from Generators.vectors2 import generate_mcq_vectors
 
 
 # =========================================================
-# Topics
+# Units + Topics
+# =========================================================
+units = {
+
+    "Dynamics": {
+
+        "Acceleration Questions":
+            generate_mcq_acc,
+
+        "Forces Questions":
+            generate_mcq_forces,
+
+        "Projectile Questions":
+            generate_projectile_mcqs,
+
+        "Simple Vectors Questions":
+            generate_mcq_vectors
+    },
+
+    "Electricity": {
+
+        "Current Questions":
+            generate_mcq_current
+    }
+}
+
+
+# =========================================================
+# Flatten topic lookup
 # =========================================================
 question_generators = {
-    "Acceleration Questions": generate_mcq_acc,
-    "Current Questions": generate_mcq_current,
-    "Forces Questions": generate_mcq_forces,
-    "Projectile Questions": generate_projectile_mcqs,
-    "Simple Vectors Questions": generate_mcq_vectors
+
+    topic: generator
+
+    for topics in units.values()
+
+    for topic, generator in topics.items()
 }
 
 
 # =========================================================
 # Init quiz
 # =========================================================
-def init_quiz(topic):
+def init_quiz(unit, topic):
 
     return {
+
+        "unit": unit,
+
         "topic": topic,
-        "questions": question_generators[topic](),
+
+        "questions":
+            question_generators[topic](),
+
         "index": 0,
+
         "score": 0,
+
         "submitted": {},
+
         "scenario_results": [],
+
         "current_scenario": None,
+
         "completed": False,
+
         "wrong_answers": []
     }
 
@@ -93,12 +134,23 @@ def render_feedback(q, selected_letter, correct):
 
 
 # =========================================================
+# Default selections
+# =========================================================
+default_unit = list(units.keys())[0]
+
+default_topic = list(
+    units[default_unit].keys()
+)[0]
+
+
+# =========================================================
 # Session state
 # =========================================================
 if "quiz" not in st.session_state:
 
     st.session_state.quiz = init_quiz(
-        "Acceleration Questions"
+        default_unit,
+        default_topic
     )
 
 quiz = st.session_state.quiz
@@ -109,18 +161,37 @@ quiz = st.session_state.quiz
 # =========================================================
 st.title("Physics Revision Tool")
 
-topic_choice = st.selectbox(
-    "Choose a topic:",
-    list(question_generators.keys())
+
+# =========================================================
+# Unit selector
+# =========================================================
+unit_choice = st.selectbox(
+    "Choose a unit:",
+    list(units.keys())
 )
 
+
+# =========================================================
+# Topic selector
+# =========================================================
+topic_choice = st.selectbox(
+    "Choose a topic:",
+    list(units[unit_choice].keys())
+)
+
+
+# =========================================================
+# Generate quiz button
+# =========================================================
 if st.button("Generate New Quiz"):
 
     st.session_state.quiz = init_quiz(
+        unit_choice,
         topic_choice
     )
 
     st.rerun()
+
 
 quiz = st.session_state.quiz
 
@@ -246,10 +317,10 @@ if isinstance(current_item, list):
     )
 
     st.info(
-    "These questions are linked. "
-    "You may use previous answers "
-    "for later parts."
-)
+        "These questions are linked. "
+        "You may use previous answers "
+        "for later parts."
+    )
 
     # -----------------------------------------------------
     # Init scenario storage
@@ -257,7 +328,10 @@ if isinstance(current_item, list):
     if quiz["current_scenario"] is None:
 
         quiz["current_scenario"] = {
-            "scenario": scenario_id,
+
+            "scenario":
+                scenario_id,
+
             "results": []
         }
 
@@ -321,8 +395,12 @@ if isinstance(current_item, list):
             )
 
             quiz["submitted"][key] = {
-                "correct": correct,
-                "selected": selected_letter
+
+                "correct":
+                    correct,
+
+                "selected":
+                    selected_letter
             }
 
             if correct:
@@ -477,7 +555,7 @@ else:
 
         # -------------------------------------------------
         # Submit answer
-        # -------------------------------------------------
+        # -----------------------------------------------------
         if st.button("Submit Answer"):
 
             correct = (
@@ -486,8 +564,12 @@ else:
             )
 
             quiz["submitted"][key] = {
-                "correct": correct,
-                "selected": selected_letter
+
+                "correct":
+                    correct,
+
+                "selected":
+                    selected_letter
             }
 
             if correct:
