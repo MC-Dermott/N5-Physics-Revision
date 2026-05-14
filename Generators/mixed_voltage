@@ -1,0 +1,84 @@
+import random
+from utils.mcq_utils import format_mcq
+
+
+# =========================================================
+# IMPORT YOUR GENERATORS
+# =========================================================
+
+from Generators.generate_potential_divider import (
+    generate_voltage_divider_question
+)
+
+from Generators.generate_three_resistors import (
+    generate_parallel_series_voltage_question,
+    generate_series_voltage_from_parallel_question
+)
+
+from Generators.transistor import (
+    generate_fixed_variable_voltage_question,
+    generate_fixed_variable_missing_voltage_question
+)
+
+
+# =========================================================
+# 3-QUESTION QUIZ BUILDER
+# =========================================================
+
+def generate_mixed_voltage_quiz_3():
+
+    questions = []
+
+    # =====================================================
+    # 1. Voltage divider question (always one)
+    # =====================================================
+
+    q1 = generate_voltage_divider_question()
+
+    questions.append(
+        format_mcq(*q1)
+    )
+
+    # =====================================================
+    # 2. Three-resistor (series + parallel) question
+    # pick randomly from its two types
+    # =====================================================
+
+    three_resistor_generators = [
+
+        generate_parallel_series_voltage_question,
+
+        generate_series_voltage_from_parallel_question
+    ]
+
+    q2 = random.choice(three_resistor_generators)()
+
+    questions.append(
+        format_mcq(*q2)
+    )
+
+    # =====================================================
+    # 3. Fixed + variable resistor question
+    # pick randomly from its two types
+    # =====================================================
+
+    variable_generators = [
+
+        generate_fixed_variable_voltage_question,
+
+        generate_fixed_variable_missing_voltage_question
+    ]
+
+    q3 = random.choice(variable_generators)()
+
+    questions.append(
+        format_mcq(*q3)
+    )
+
+    # =====================================================
+    # Optional shuffle so order changes each quiz
+    # =====================================================
+
+    random.shuffle(questions)
+
+    return questions

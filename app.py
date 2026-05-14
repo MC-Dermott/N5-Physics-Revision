@@ -6,621 +6,307 @@ from Generators.forces import generate_mcq_forces
 from Generators.projectiles import generate_projectile_mcqs
 from Generators.vectors2 import generate_mcq_vectors
 from Generators.gas_laws import generate_gas_law_mcqs
+from Generators.weight import generate_mcq_wmg
+from Generators.energy import generate_energy_quiz
+from Generators.potential_divider_generator import generate_potential_divider_mcq
+from Generators.transistor_generator import generate_fixed_5v_potential_divider_quiz
+from Generators.complex_circuit_generator import generate_parallel_series_quiz
+from Generators.mixed_voltage import generate_circuit_quiz
 
 
 # =========================================================
-# Units + Topics
+# UNIT SETUP
 # =========================================================
+
 units = {
-
     "Dynamics": {
-
-        "Acceleration Questions":
-            generate_mcq_acc,
-
-        "Forces Questions":
-            generate_mcq_forces,
-
-        "Projectile Questions":
-            generate_projectile_mcqs,
-
-        "Simple Vectors Questions":
-            generate_mcq_vectors
+        "Acceleration Questions": generate_mcq_acc,
+        "Forces Questions": generate_mcq_forces,
+        "Projectile Questions": generate_projectile_mcqs,
+        "Simple Vectors Questions": generate_mcq_vectors,
+        "Weight questions": generate_mcq_wmg,
+        "Energy Questions": generate_energy_quiz
     },
 
     "Electricity": {
-
-        "Current Questions":
-            generate_mcq_current
+        "Current Questions": generate_mcq_current,
+        "Potential Divider Questions": generate_potential_divider_mcq,
+        "Transistor Questions": generate_fixed_5v_potential_divider_quiz,
+        "Complex Circuit Questions": generate_parallel_series_quiz,
+        "Mixed Voltage": generate_circuit_quiz
     },
-    
+
     "Properties of Matter": {
-        "Gas Law Questions":
-            generate_gas_law_mcqs
+        "Gas Law Questions": generate_gas_law_mcqs
     }
 }
 
 
-# =========================================================
-# Flatten topic lookup
-# =========================================================
 question_generators = {
-
     topic: generator
-
     for topics in units.values()
-
     for topic, generator in topics.items()
 }
 
 
 # =========================================================
-# Init quiz
+# INIT
 # =========================================================
+
 def init_quiz(unit, topic):
-
     return {
-
         "unit": unit,
-
         "topic": topic,
-
-        "questions":
-            question_generators[topic](),
-
+        "questions": question_generators[topic](),
         "index": 0,
-
         "score": 0,
-
         "submitted": {},
-
         "scenario_results": [],
-
         "current_scenario": None,
-
         "completed": False,
-
         "wrong_answers": []
     }
 
 
 # =========================================================
-# Feedback renderer
+# IMAGE HELPER
 # =========================================================
+
+def render_diagram(q):
+    """
+    Safely renders diagram if present
+    """
+    if q.get("diagram"):
+        st.image(
+            q["diagram"],
+            use_container_width=True
+        )
+
+
+# =========================================================
+# FEEDBACK
+# =========================================================
+
 def render_feedback(q, selected_letter, correct):
 
     fb = q["feedback"][selected_letter]
 
-    # -----------------------------------------------------
-    # Correct / Incorrect
-    # -----------------------------------------------------
     if correct:
-
         st.success("Correct!")
-
     else:
-
         st.error(
-            f"Incorrect. Correct answer: "
-            f"{q['choices'][q['answer']]}"
+            f"Incorrect. Correct answer: {q['choices'][q['answer']]}"
         )
 
-    # -----------------------------------------------------
-    # Summary
-    # -----------------------------------------------------
     st.info(fb["summary"])
 
-    # -----------------------------------------------------
-    # Key mistake
-    # -----------------------------------------------------
     if fb.get("mistake"):
+        st.warning(f"Key issue: {fb['mistake']}")
 
-        st.warning(
-            f"Key issue: {fb['mistake']}"
-        )
-
-    # -----------------------------------------------------
-    # Working
-    # -----------------------------------------------------
     st.markdown("### Working")
 
     for step in fb["working"]:
-
         if step["type"] == "text":
-
             st.write(step["content"])
-
         elif step["type"] == "latex":
-
             st.latex(step["content"])
-
         else:
-
             st.write(step["content"])
 
 
 # =========================================================
-# Default selections
+# UI SETUP
 # =========================================================
-default_unit = list(units.keys())[0]
 
-default_topic = list(
-    units[default_unit].keys()
-)[0]
-
-
-# =========================================================
-# Session state
-# =========================================================
-if "quiz" not in st.session_state:
-
-    st.session_state.quiz = init_quiz(
-        default_unit,
-        default_topic
-    )
-
-quiz = st.session_state.quiz
-
-
-# =========================================================
-# UI
-# =========================================================
 st.title("Physics Revision Tool")
 
+unit_choice = st.selectbox("Choose a unit:", list(units.keys()))
+topic_choice = st.selectbox("Choose a topic:", list(units[unit_choice].keys()))
 
-# =========================================================
-# Unit selector
-# =========================================================
-unit_choice = st.selectbox(
-    "Choose a unit:",
-    list(units.keys())
-)
-
-
-# =========================================================
-# Topic selector
-# =========================================================
-topic_choice = st.selectbox(
-    "Choose a topic:",
-    list(units[unit_choice].keys())
-)
-
-
-# =========================================================
-# Generate quiz button
-# =========================================================
 if st.button("Generate New Quiz"):
-
-    st.session_state.quiz = init_quiz(
-        unit_choice,
-        topic_choice
-    )
-
+    st.session_state.quiz = init_quiz(unit_choice, topic_choice)
     st.rerun()
 
+if "quiz" not in st.session_state:
+    st.session_state.quiz = init_quiz(
+        list(units.keys())[0],
+        list(units[list(units.keys())[0]].keys())[0]
+    )
 
 quiz = st.session_state.quiz
 
 
 # =========================================================
-# Completion screen
+# COMPLETION SCREEN
 # =========================================================
+
 if quiz["completed"]:
-
-    total_questions = sum(
-        len(q) if isinstance(q, list) else 1
-        for q in quiz["questions"]
-    )
-
     st.subheader("Quiz Complete 🎉")
-
-    st.write(
-        f"Final Score: "
-        f"{quiz['score']} / {total_questions}"
-    )
-
-    # =====================================================
-    # Wrong answer review
-    # =====================================================
-    if quiz["wrong_answers"]:
-
-        st.subheader("Review Your Mistakes")
-
-        for i, r in enumerate(
-            quiz["wrong_answers"],
-            start=1
-        ):
-
-            # -------------------------------------------------
-            # Heading
-            # -------------------------------------------------
-            if r.get("scenario") is not None:
-
-                st.markdown(
-                    f"## Scenario {r['scenario'] + 1} "
-                    f"— Question {r['part']}"
-                )
-
-            else:
-
-                st.markdown(
-                    f"## Question "
-                    f"{r.get('question_number', i)}"
-                )
-
-            # -------------------------------------------------
-            # Question
-            # -------------------------------------------------
-            st.write(r["question"])
-
-            # -------------------------------------------------
-            # Answers
-            # -------------------------------------------------
-            st.error(
-                f"Your answer: "
-                f"{r['your_answer']}"
-            )
-
-            st.success(
-                f"Correct answer: "
-                f"{r['correct_answer']}"
-            )
-
-            # -------------------------------------------------
-            # Summary
-            # -------------------------------------------------
-            st.info(r["summary"])
-
-            # -------------------------------------------------
-            # Mistake
-            # -------------------------------------------------
-            if r["mistake"]:
-
-                st.warning(
-                    f"Key issue: "
-                    f"{r['mistake']}"
-                )
-
-            # -------------------------------------------------
-            # Working
-            # -------------------------------------------------
-            st.markdown("### Working")
-
-            for step in r["working"]:
-
-                if step["type"] == "text":
-
-                    st.write(step["content"])
-
-                elif step["type"] == "latex":
-
-                    st.latex(step["content"])
-
-                else:
-
-                    st.write(step["content"])
-
-            st.divider()
+    st.write(f"Score: {quiz['score']}")
 
     st.stop()
 
 
 # =========================================================
-# Current item
+# CURRENT QUESTION
 # =========================================================
+
 current_item = quiz["questions"][quiz["index"]]
 
 
 # =========================================================
-# PROJECTILE SCENARIOS
+# SCENARIO QUESTIONS
 # =========================================================
+
 if isinstance(current_item, list):
 
     scenario_id = quiz["index"]
 
-    st.header(
-        f"Scenario {scenario_id + 1}"
-    )
+    st.header(f"Scenario {scenario_id + 1}")
 
-    st.info(
-        "These questions are linked. "
-        "You may use previous answers "
-        "for later parts."
-    )
-
-    # -----------------------------------------------------
-    # Init scenario storage
-    # -----------------------------------------------------
     if quiz["current_scenario"] is None:
-
         quiz["current_scenario"] = {
-
-            "scenario":
-                scenario_id,
-
+            "scenario": scenario_id,
             "results": []
         }
 
-    # =====================================================
-    # Scenario questions
-    # =====================================================
-    for part_num, q in enumerate(
-        current_item,
-        start=1
-    ):
+    for part_num, q in enumerate(current_item, start=1):
 
-        st.markdown(
-            f"## Question {part_num}"
-        )
+        st.markdown(f"## Question {part_num}")
+
+        # ✅ IMAGE ADDED HERE
+        render_diagram(q)
 
         st.write(q["question"])
 
         key = f"{scenario_id}_{part_num}"
 
-        # -------------------------------------------------
-        # Already answered
-        # -------------------------------------------------
         if key in quiz["submitted"]:
 
             result = quiz["submitted"][key]
 
-            render_feedback(
-                q,
-                result["selected"],
-                result["correct"]
-            )
+            render_feedback(q, result["selected"], result["correct"])
 
             st.divider()
-
             continue
 
-        # -------------------------------------------------
-        # Answer selection
-        # -------------------------------------------------
-        selected = st.radio(
+        options = list(q["choices_display"].keys())
+
+        selected_letter = st.radio(
             "Select your answer:",
-            list(
-                q["choices_display"].values()
-            ),
+            options,
+            format_func=lambda x: q["choices_display"][x],
             key=key
         )
 
-        selected_letter = selected[0]
+        if st.button(f"Submit Question {part_num}", key=f"btn_{key}"):
 
-        # -------------------------------------------------
-        # Submit answer
-        # -------------------------------------------------
-        if st.button(
-            f"Submit Question {part_num}",
-            key=f"btn_{key}"
-        ):
-
-            correct = (
-                selected_letter
-                == q["answer"]
-            )
+            correct = selected_letter == q["answer"]
 
             quiz["submitted"][key] = {
-
-                "correct":
-                    correct,
-
-                "selected":
-                    selected_letter
+                "correct": correct,
+                "selected": selected_letter
             }
 
             if correct:
-
                 quiz["score"] += 1
 
             fb = q["feedback"][selected_letter]
 
-            # -------------------------------------------------
-            # Result data
-            # -------------------------------------------------
-            result_data = {
-
-                "scenario":
-                    scenario_id,
-
-                "part":
-                    part_num,
-
-                "question":
-                    q["question"],
-
-                "your_answer":
-                    q["choices"][
-                        selected_letter
-                    ],
-
-                "correct_answer":
-                    q["choices"][
-                        q["answer"]
-                    ],
-
-                "summary":
-                    fb["summary"],
-
-                "mistake":
-                    fb.get("mistake"),
-
-                "working":
-                    fb["working"],
-
-                "correct":
-                    correct
-            }
-
-            # -------------------------------------------------
-            # Store scenario result
-            # -------------------------------------------------
-            quiz["current_scenario"]["results"].append(
-                result_data
-            )
-
-            # -------------------------------------------------
-            # Store wrong answers
-            # -------------------------------------------------
-            if not correct:
-
-                quiz["wrong_answers"].append(
-                    result_data
-                )
+            quiz["current_scenario"]["results"].append({
+                "scenario": scenario_id,
+                "part": part_num,
+                "question": q["question"],
+                "your_answer": q["choices"][selected_letter],
+                "correct_answer": q["choices"][q["answer"]],
+                "summary": fb["summary"],
+                "mistake": fb.get("mistake"),
+                "working": fb["working"],
+                "correct": correct
+            })
 
             st.rerun()
 
         st.divider()
 
-    # =====================================================
-    # Next scenario
-    # =====================================================
     if st.button("Next Scenario"):
-
-        if quiz["current_scenario"] is not None:
-
-            quiz["scenario_results"].append(
-                quiz["current_scenario"]
-            )
-
-            quiz["current_scenario"] = None
-
         quiz["index"] += 1
-
         quiz["submitted"] = {}
 
-        if quiz["index"] >= len(
-            quiz["questions"]
-        ):
-
+        if quiz["index"] >= len(quiz["questions"]):
             quiz["completed"] = True
 
         st.rerun()
 
 
 # =========================================================
-# SINGLE QUESTION TOPICS
+# SINGLE QUESTIONS
 # =========================================================
+
 else:
 
     q = current_item
 
     st.subheader(
-        f"Question "
-        f"{quiz['index'] + 1} "
-        f"of "
-        f"{len(quiz['questions'])}"
+        f"Question {quiz['index'] + 1} of {len(quiz['questions'])}"
     )
+
+    # ✅ IMAGE ADDED HERE
+    render_diagram(q)
 
     st.write(q["question"])
 
     key = f"single_{quiz['index']}"
 
-    # -----------------------------------------------------
-    # Already answered
-    # -----------------------------------------------------
     if key in quiz["submitted"]:
 
         result = quiz["submitted"][key]
 
-        render_feedback(
-            q,
-            result["selected"],
-            result["correct"]
-        )
+        render_feedback(q, result["selected"], result["correct"])
 
-        # -------------------------------------------------
-        # Next question
-        # -------------------------------------------------
         if st.button("Next Question"):
 
             quiz["index"] += 1
 
-            if quiz["index"] >= len(
-                quiz["questions"]
-            ):
-
+            if quiz["index"] >= len(quiz["questions"]):
                 quiz["completed"] = True
 
             st.rerun()
 
-    # -----------------------------------------------------
-    # Not submitted yet
-    # -----------------------------------------------------
     else:
 
-        selected = st.radio(
+        options = list(q["choices_display"].keys())
+
+        selected_letter = st.radio(
             "Select your answer:",
-            list(
-                q["choices_display"].values()
-            ),
+            options,
+            format_func=lambda x: q["choices_display"][x],
             key=key
         )
 
-        selected_letter = selected[0]
-
-        # -------------------------------------------------
-        # Submit answer
-        # -----------------------------------------------------
         if st.button("Submit Answer"):
 
-            correct = (
-                selected_letter
-                == q["answer"]
-            )
+            correct = selected_letter == q["answer"]
 
             quiz["submitted"][key] = {
-
-                "correct":
-                    correct,
-
-                "selected":
-                    selected_letter
+                "correct": correct,
+                "selected": selected_letter
             }
 
             if correct:
-
                 quiz["score"] += 1
-
             else:
+                fb = q["feedback"][selected_letter]
 
-                fb = q["feedback"][
-                    selected_letter
-                ]
-
-                result_data = {
-
-                    "question_number":
-                        quiz["index"] + 1,
-
-                    "question":
-                        q["question"],
-
-                    "your_answer":
-                        q["choices"][
-                            selected_letter
-                        ],
-
-                    "correct_answer":
-                        q["choices"][
-                            q["answer"]
-                        ],
-
-                    "summary":
-                        fb["summary"],
-
-                    "mistake":
-                        fb.get("mistake"),
-
-                    "working":
-                        fb["working"],
-
-                    "correct":
-                        False
-                }
-
-                quiz["wrong_answers"].append(
-                    result_data
-                )
+                quiz["wrong_answers"].append({
+                    "question_number": quiz["index"] + 1,
+                    "question": q["question"],
+                    "your_answer": q["choices"][selected_letter],
+                    "correct_answer": q["choices"][q["answer"]],
+                    "summary": fb["summary"],
+                    "mistake": fb.get("mistake"),
+                    "working": fb["working"],
+                    "correct": False
+                })
 
             st.rerun()

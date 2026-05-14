@@ -35,7 +35,7 @@ def format_mcq(
 
         value = option["value"]
 
-        display = f"{value} {unit}"
+        display = option.get("display", f"{value} {unit}")
 
         choices[letter] = display
 
@@ -55,7 +55,7 @@ def format_mcq(
                 option["working"]
         }
 
-        if value == correct_val:
+        if round(float(value), 6) == round(float(correct_val), 6):
             correct_letter = letter
 
     return {
