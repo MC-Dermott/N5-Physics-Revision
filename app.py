@@ -12,6 +12,7 @@ from Generators.potential_divider_generator import generate_potential_divider_mc
 from Generators.transistor_generator import generate_fixed_5v_potential_divider_quiz
 from Generators.complex_circuit_generator import generate_parallel_series_quiz
 from Generators.mixed_voltage import generate_circuit_quiz
+from Generators.pressure import generate_pressure_mcqs
 
 
 # =========================================================
@@ -37,7 +38,8 @@ units = {
     },
 
     "Properties of Matter": {
-        "Gas Law Questions": generate_gas_law_mcqs
+        "Gas Law Questions": generate_gas_law_mcqs,
+        "Pressure Questions": generate_pressure_mcqs
     }
 }
 

@@ -64,14 +64,7 @@ def generate_circuit_quiz():
 
         raw = question_func()
 
-        # =================================================
-        # FIX: unpack diagram separately if present
-        # =================================================
-        if len(raw) == 5:
-            question, correct, options_data, unit, diagram = raw
-        else:
-            question, correct, options_data, unit = raw
-            diagram = None
+        question, correct, options_data, unit, diagram = raw
 
         formatted = format_mcq(
             question,

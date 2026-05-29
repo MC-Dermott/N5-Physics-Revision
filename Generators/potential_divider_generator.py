@@ -1,49 +1,15 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.circuit_utils import generate_resistance, make_distractors
 
 
 # =========================================================
 # Helpers
 # =========================================================
 
-def generate_resistance():
-    """
-    0.5 kΩ to 5.0 kΩ in 0.5 kΩ steps
-    """
-    return random.randint(1, 10) * 0.5
-
-
 def generate_voltage():
-    """
-    0.5V to 8.5V in 0.5V steps
-    """
+    # 0.5V to 8.5V in 0.5V steps
     return random.randint(1, 17) * 0.5
-
-
-def make_distractors(correct):
-    """
-    Generate EXACTLY 3 unique distractors
-    """
-
-    distractors = set()
-
-    while len(distractors) < 3:
-
-        variation = random.choice([
-            -2,
-            -1,
-            -0.5,
-            0.5,
-            1,
-            2
-        ])
-
-        value = round(correct + variation, 2)
-
-        if value > 0 and value != correct:
-            distractors.add(value)
-
-    return list(distractors)
 
 
 # =========================================================
@@ -291,14 +257,6 @@ def generate_single_potential_divider_mcq():
 # =========================================================
 # QUIZ GENERATOR
 # =========================================================
-
-def generate_potential_divider_mcq(num_questions=5):
-
-    questions = []
-
-    for _ in range(num_questions):
-
-        raw = generate_single_potential_divider_mcq()
 
 def generate_potential_divider_mcq(num_questions=5):
 

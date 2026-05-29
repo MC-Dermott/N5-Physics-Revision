@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.circuit_utils import generate_resistance, make_distractors
 
 
 # =========================================================
@@ -7,25 +8,6 @@ from utils.mcq_utils import format_mcq
 # =========================================================
 
 SUPPLY_VOLTAGE = 5
-
-
-def generate_resistance():
-    return random.randint(1, 10) * 0.5
-
-
-def make_distractors(correct):
-
-    distractors = set()
-
-    while len(distractors) < 3:
-
-        variation = random.choice([-2, -1, -0.5, 0.5, 1, 2])
-        value = round(correct + variation, 2)
-
-        if value > 0 and value != correct:
-            distractors.add(value)
-
-    return list(distractors)
 
 
 # =========================================================
