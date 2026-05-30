@@ -14,6 +14,9 @@ from Generators.complex_circuit_generator import generate_parallel_series_quiz
 from Generators.mixed_voltage import generate_circuit_quiz
 from Generators.pressure import generate_pressure_mcqs
 from Generators.specific_heat_generator import generate_specific_heat_mcqs
+from Generators.wave_speed import generate_wave_speed_mcqs
+from Generators.period_frequency import generate_period_frequency_mcqs
+from Generators.waves_combined import generate_waves_combined_mcqs
 
 
 # =========================================================
@@ -36,6 +39,12 @@ units = {
         "Transistor Questions": generate_fixed_5v_potential_divider_quiz,
         "Complex Circuit Questions": generate_parallel_series_quiz,
         "Mixed Voltage": generate_circuit_quiz
+    },
+
+    "Waves": {
+        "Wave Speed Questions": generate_wave_speed_mcqs,
+        "Period and Frequency Questions": generate_period_frequency_mcqs,
+        "Waves Combined Questions": generate_waves_combined_mcqs,
     },
 
     "Properties of Matter": {
