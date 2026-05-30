@@ -21,13 +21,16 @@ def sci_latex(val):
     return rf"{mantissa} \times 10^{{{exp}}}"
 
 
+_SUPERSCRIPT = str.maketrans("0123456789-", "⁰¹²³⁴⁵⁶⁷⁸⁹⁻")
+
+
 def sci_plain(val):
-    """Plain-text scientific notation, e.g. '6 × 10^9' (for MCQ choice labels)."""
+    """Plain-text scientific notation with Unicode superscripts, e.g. '6 × 10⁹'."""
     exp = int(math.floor(math.log10(abs(val))))
     mantissa = round(val / 10 ** exp, 2)
     if mantissa == int(mantissa):
         mantissa = int(mantissa)
-    return f"{mantissa} × 10^{exp}"
+    return f"{mantissa} × 10{str(exp).translate(_SUPERSCRIPT)}"
 
 
 def fmt_val(val):

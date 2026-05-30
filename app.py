@@ -111,8 +111,6 @@ def render_feedback(q, selected_letter, correct):
             f"Incorrect. Correct answer: {q['choices'][q['answer']]}"
         )
 
-    st.info(fb["summary"])
-
     if fb.get("mistake"):
         st.warning(f"Key issue: {fb['mistake']}")
 

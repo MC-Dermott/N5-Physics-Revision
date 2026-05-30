@@ -27,12 +27,23 @@ def sci_latex(val):
     return rf"{mantissa} \times 10^{{{exp}}}"
 
 
+_SUPERSCRIPT = str.maketrans("0123456789-", "⁰¹²³⁴⁵⁶⁷⁸⁹⁻")
+
+
+def _sci_plain(val):
+    exp = int(math.floor(math.log10(abs(val))))
+    mantissa = round(val / 10 ** exp, 2)
+    if mantissa == int(mantissa):
+        mantissa = int(mantissa)
+    return f"{mantissa} × 10{str(exp).translate(_SUPERSCRIPT)}"
+
+
 def fmt_val(val):
     if val == 0:
         return "0"
     if 0.001 <= abs(val) < 1e6:
         return str(round_sf(val))
-    return str(round_sf(val, 3))  # plain number even if large/small
+    return _sci_plain(val)
 
 
 def opt_display(val, unit):
