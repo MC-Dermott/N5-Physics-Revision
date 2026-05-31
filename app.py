@@ -15,6 +15,7 @@ from Generators.mixed_voltage import generate_circuit_quiz
 from Generators.pressure import generate_pressure_mcqs
 from Generators.specific_heat_generator import generate_specific_heat_mcqs
 from Generators.radiation import generate_radiation_scenarios
+from Generators.half_life import generate_half_life_mcqs
 from Generators.wave_speed import generate_wave_speed_mcqs
 from Generators.period_frequency import generate_period_frequency_mcqs
 from Generators.waves_combined import generate_waves_combined_mcqs
@@ -44,6 +45,7 @@ units = {
 
     "Radiation": {
         "Radiation Questions": generate_radiation_scenarios,
+        "Half-Life Questions": generate_half_life_mcqs,
     },
 
     "Waves": {
