@@ -14,6 +14,17 @@ RADIATION_TYPES = [
 D_OPTIONS = [2, 4, 5, 8, 10, 20]   # absorbed dose in Gy (integers for clean maths)
 TIME_OPTIONS = [2, 4, 5, 10]        # exposure time in hours (t=1 excluded: H=dose_rate collapses distractors)
 
+W_R_TABLE = (
+    "| Type of radiation | Radiation weighting factor (w_R) |\n"
+    "|---|---|\n"
+    "| Alpha particles | 20 |\n"
+    "| Beta particles | 1 |\n"
+    "| Gamma rays | 1 |\n"
+    "| Fast neutrons | 20 |\n"
+    "| Slow neutrons | 3 |\n"
+    "| X-rays | 1 |"
+)
+
 
 def round_sf(value, sf=3):
     if value == 0:
@@ -352,7 +363,8 @@ def generate_forward_scenario():
     w_R = rad["w_R"]
 
     context = (
-        f"A patient is exposed to {rad_name} (radiation weighting factor = {w_R}). "
+        f"{W_R_TABLE}\n\n"
+        f"A patient is exposed to {rad_name}. "
         f"A mass of {mass_text} of tissue absorbs {round_sf(E)} J of energy. "
         f"The exposure lasts {t_h} hour{'s' if t_h > 1 else ''}."
     )
@@ -380,7 +392,8 @@ def generate_reverse_scenario():
     w_R = rad["w_R"]
 
     context = (
-        f"A worker is exposed to {rad_name} (radiation weighting factor = {w_R}). "
+        f"{W_R_TABLE}\n\n"
+        f"A worker is exposed to {rad_name}. "
         f"The equivalent dose rate is {round_sf(dose_rate)} Sv/h. "
         f"The exposure lasts {t_h} hour{'s' if t_h > 1 else ''}. "
         f"The mass of tissue exposed is {mass_text}."
