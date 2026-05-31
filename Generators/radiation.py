@@ -42,8 +42,13 @@ def pick_mass():
 
 
 def _wu(val):
-    """Sentinel value for a wrong-unit distractor: negative, always unique."""
+    """Sentinel for first wrong-unit distractor (negative, always distinct from positive correct)."""
     return -abs(val)
+
+
+def _wu2(val):
+    """Sentinel for second wrong-unit distractor (always distinct from _wu)."""
+    return -(abs(val) * 2 + 1)
 
 
 # =========================================================
@@ -125,10 +130,16 @@ def _E_working(D, mass_kg, E, is_grams, mass_g):
 def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g, D):
     working = _D_working(E, mass_kg, D, is_grams, mass_g)
 
-    # multiply error guard: E × mass_kg = D when mass_kg = 1
-    mult_error = round_sf(E * mass_kg)
-    if round_sf(mult_error) == round_sf(D):
-        mult_error = round_sf(D * 2)
+    if is_grams:
+        content_val = round_sf(E / mass_g)
+        content_mistake = (f"You used the mass in grams ({mass_g} g) without converting to kg. "
+                           f"{mass_g} g = {mass_kg} kg.")
+    else:
+        mult_error = round_sf(E * mass_kg)
+        if round_sf(mult_error) == round_sf(D):
+            mult_error = round_sf(D * 2)
+        content_val = mult_error
+        content_mistake = "You multiplied E × m instead of dividing. D = E ÷ m."
 
     options_data = [
         {"value": D,
@@ -138,28 +149,14 @@ def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g,
          "mistake": "Absorbed dose is measured in Gray (Gy), not Sievert (Sv). "
                     "Sievert is used for equivalent dose.",
          "working": working},
-        {"value": mult_error,
+        {"value": _wu2(D), "display": f"{round_sf(D)} J",
          "summary": "Incorrect.",
-         "mistake": "You multiplied E × m instead of dividing. D = E ÷ m.",
+         "mistake": "Absorbed dose is measured in Gray (Gy), not Joules. "
+                    "Joules measure energy; D = E ÷ m gives Gray.",
          "working": working},
+        {"value": content_val,
+         "summary": "Incorrect.", "mistake": content_mistake, "working": working},
     ]
-
-    if is_grams:
-        options_data.append({
-            "value": round_sf(E / mass_g),
-            "summary": "Incorrect.",
-            "mistake": f"You used the mass in grams ({mass_g} g) without converting to kg. "
-                       f"{mass_g} g = {mass_kg} kg.",
-            "working": working,
-        })
-    else:
-        inv_error = round_sf(mass_kg / E)
-        options_data.append({
-            "value": inv_error,
-            "summary": "Incorrect.",
-            "mistake": "You divided m by E instead of E by m. D = E ÷ m.",
-            "working": working,
-        })
 
     return format_mcq(question, D, options_data, "Gy")
 
@@ -167,21 +164,15 @@ def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g,
 def _make_H_mcq(question, D, w_R, H):
     working = _H_working(D, w_R, H)
 
-    # distractors
+    # Wrong-w_R content distractor
     wrong_wRs = [x for x in [1, 3, 20] if x != w_R]
-    d_wrong_wR = round_sf(D * wrong_wRs[0])
-
     if w_R == 1:
-        # D/w_R = D = H when w_R=1 → use a distinct wrong-w_R value instead
-        div_error = d_wrong_wR
-        div_mistake = f"You used a radiation weighting factor of {wrong_wRs[0]} instead of {w_R}."
+        # D/w_R = D = H when w_R=1 — use a wrong-w_R multiply instead
+        content_val = round_sf(D * wrong_wRs[0])
+        content_mistake = "Check the radiation weighting factor in the table for this type of radiation."
     else:
-        div_error = round_sf(D / w_R)
-        div_mistake = "You divided D by w_R instead of multiplying. H = D × w_R."
-
-    # second wrong-w_R distractor
-    alt_wRs = [x for x in wrong_wRs if round_sf(D * x) != round_sf(div_error)]
-    d_alt = round_sf(D * alt_wRs[0]) if alt_wRs else round_sf(H * 2)
+        content_val = round_sf(D / w_R)
+        content_mistake = "You divided D by w_R instead of multiplying. H = D × w_R."
 
     options_data = [
         {"value": H,
@@ -191,12 +182,13 @@ def _make_H_mcq(question, D, w_R, H):
          "mistake": "Equivalent dose is measured in Sievert (Sv), not Gray (Gy). "
                     "Gray is used for absorbed dose.",
          "working": working},
-        {"value": div_error,
-         "summary": "Incorrect.", "mistake": div_mistake, "working": working},
-        {"value": d_alt,
+        {"value": _wu2(H), "display": f"{round_sf(H)} Sv/h",
          "summary": "Incorrect.",
-         "mistake": f"Check the radiation weighting factor for this radiation type.",
+         "mistake": "Equivalent dose is measured in Sievert (Sv), not Sv/h. "
+                    "Sv/h is used for dose rate.",
          "working": working},
+        {"value": content_val,
+         "summary": "Incorrect.", "mistake": content_mistake, "working": working},
     ]
 
     return format_mcq(question, H, options_data, "Sv")
@@ -205,31 +197,25 @@ def _make_H_mcq(question, D, w_R, H):
 def _make_Hdot_mcq(question, H, t_h, dose_rate):
     working = _Hdot_working(H, t_h, dose_rate)
 
-    mult_error = round_sf(H * t_h)
-    inv_error = round_sf(t_h / H)
     forgot_t = round_sf(H)
-    # Guard 1: inv = dose_rate when H = t_h
-    if round_sf(inv_error) == round_sf(dose_rate):
-        inv_error = round_sf(dose_rate + H)
-    # Guard 2: inv = forgot_t after guard 1
-    if round_sf(inv_error) == round_sf(forgot_t):
-        inv_error = round_sf(dose_rate * 2) if dose_rate > 1 else round_sf(dose_rate * 0.5)
 
     options_data = [
         {"value": dose_rate,
          "summary": "Correct!", "mistake": None, "working": working},
-        {"value": mult_error,
+        {"value": _wu(dose_rate), "display": f"{round_sf(dose_rate)} Sv",
          "summary": "Incorrect.",
-         "mistake": "You multiplied H × t instead of dividing. Ḣ = H ÷ t.",
+         "mistake": "Dose rate is measured in Sv/h, not Sv. "
+                    "Sv measures total equivalent dose; divide by time to get the rate.",
          "working": working},
-        {"value": inv_error,
+        {"value": _wu2(dose_rate), "display": f"{round_sf(dose_rate)} Gy",
          "summary": "Incorrect.",
-         "mistake": "You divided t by H instead of H by t. Ḣ = H ÷ t.",
+         "mistake": "Dose rate is measured in Sv/h, not Gy. "
+                    "Gray measures absorbed dose; equivalent dose rate uses Sv/h.",
          "working": working},
         {"value": forgot_t,
          "summary": "Incorrect.",
-         "mistake": "You gave the equivalent dose (Sv) rather than the dose rate (Sv/h). "
-                    "Divide H by the time to get the rate.",
+         "mistake": "You gave the equivalent dose (Sv), not the dose rate (Sv/h). "
+                    "Divide H by the time: Ḣ = H ÷ t.",
          "working": working},
     ]
 
@@ -240,23 +226,23 @@ def _make_H_from_rate_mcq(question, dose_rate, t_h, H):
     working = _H_from_rate_working(dose_rate, t_h, H)
 
     div_error = round_sf(dose_rate / t_h)
-    forgot_t = round_sf(dose_rate)
 
     options_data = [
         {"value": H,
          "summary": "Correct!", "mistake": None, "working": working},
         {"value": _wu(H), "display": f"{round_sf(H)} Gy",
          "summary": "Incorrect.",
-         "mistake": "Equivalent dose is measured in Sievert (Sv), not Gray (Gy).",
+         "mistake": "Equivalent dose is measured in Sievert (Sv), not Gray (Gy). "
+                    "Gray is used for absorbed dose.",
+         "working": working},
+        {"value": _wu2(H), "display": f"{round_sf(H)} Sv/h",
+         "summary": "Incorrect.",
+         "mistake": "Equivalent dose is measured in Sievert (Sv), not Sv/h. "
+                    "Sv/h is the unit for dose rate.",
          "working": working},
         {"value": div_error,
          "summary": "Incorrect.",
          "mistake": "You divided Ḣ by t instead of multiplying. H = Ḣ × t.",
-         "working": working},
-        {"value": forgot_t,
-         "summary": "Incorrect.",
-         "mistake": "You gave the dose rate rather than the total equivalent dose. "
-                    "Multiply the dose rate by the time: H = Ḣ × t.",
          "working": working},
     ]
 
@@ -270,27 +256,23 @@ def _make_D_from_H_mcq(question, H, w_R, D):
     if round_sf(mult_error) == round_sf(D):
         mult_error = round_sf(D * 2)
 
-    # When w_R=1, H=D so round_sf(H) == D (correct answer) — use H/20 instead
-    d4 = round_sf(H)
-    d4_mistake = ("You gave the equivalent dose, not the absorbed dose. "
-                  "Divide by the weighting factor: D = H ÷ w_R.")
-    if round_sf(d4) == round_sf(D):
-        d4 = round_sf(H / 20)
-        d4_mistake = "Check the radiation weighting factor — using w_R = 20 here would give this answer."
-
     options_data = [
         {"value": D,
          "summary": "Correct!", "mistake": None, "working": working},
         {"value": _wu(D), "display": f"{round_sf(D)} Sv",
          "summary": "Incorrect.",
-         "mistake": "Absorbed dose is measured in Gray (Gy), not Sievert (Sv).",
+         "mistake": "Absorbed dose is measured in Gray (Gy), not Sievert (Sv). "
+                    "Sievert is used for equivalent dose.",
+         "working": working},
+        {"value": _wu2(D), "display": f"{round_sf(D)} J",
+         "summary": "Incorrect.",
+         "mistake": "Absorbed dose is measured in Gray (Gy), not Joules. "
+                    "Gray = J/kg; the mass is already accounted for.",
          "working": working},
         {"value": mult_error,
          "summary": "Incorrect.",
          "mistake": "You multiplied H × w_R instead of dividing. D = H ÷ w_R.",
          "working": working},
-        {"value": d4,
-         "summary": "Incorrect.", "mistake": d4_mistake, "working": working},
     ]
 
     return format_mcq(question, D, options_data, "Gy")
@@ -299,43 +281,33 @@ def _make_D_from_H_mcq(question, H, w_R, D):
 def _make_E_mcq(question, D, mass_display, mass_unit, mass_kg, is_grams, mass_g, E):
     working = _E_working(D, mass_kg, E, is_grams, mass_g)
 
-    inv_error = round_sf(D / mass_kg)
-    # When mass_kg=1, E=D so D/mass_kg=D=E (collision); use E×3 — avoids E+D=2E too
-    if round_sf(inv_error) == round_sf(E):
-        inv_error = round_sf(E * 3)
-    div_by_D = round_sf(mass_kg / D)
-    # When D == mass_kg, div_by_D = inv_error = 1; replace div_by_D
-    if round_sf(div_by_D) == round_sf(inv_error):
-        div_by_D = round_sf(E * 2)
+    if is_grams:
+        content_val = round_sf(D * mass_g)
+        content_mistake = (f"You used the mass in grams ({mass_g} g) without converting to kg. "
+                           f"{mass_g} g = {mass_kg} kg.")
+    else:
+        inv_error = round_sf(D / mass_kg)
+        if round_sf(inv_error) == round_sf(E):
+            inv_error = round_sf(E * 3)
+        content_val = inv_error
+        content_mistake = "You divided D by m instead of multiplying. E = D × m."
 
     options_data = [
         {"value": E,
          "summary": "Correct!", "mistake": None, "working": working},
-        {"value": inv_error,
+        {"value": _wu(E), "display": f"{round_sf(E)} Gy",
          "summary": "Incorrect.",
-         "mistake": "You divided D by m instead of multiplying. E = D × m.",
+         "mistake": "Energy is measured in Joules (J), not Gray. "
+                    "Gray = J/kg and is used for absorbed dose.",
          "working": working},
-        {"value": div_by_D,
+        {"value": _wu2(E), "display": f"{round_sf(E)} Sv",
          "summary": "Incorrect.",
-         "mistake": "You divided m by D. To find energy: E = D × m.",
+         "mistake": "Energy is measured in Joules (J), not Sievert. "
+                    "Sievert is used for equivalent dose.",
          "working": working},
+        {"value": content_val,
+         "summary": "Incorrect.", "mistake": content_mistake, "working": working},
     ]
-
-    if is_grams:
-        options_data.append({
-            "value": round_sf(D * mass_g),
-            "summary": "Incorrect.",
-            "mistake": f"You used the mass in grams ({mass_g} g) without converting to kg. "
-                       f"{mass_g} g = {mass_kg} kg.",
-            "working": working,
-        })
-    else:
-        options_data.append({
-            "value": round_sf(E + D),
-            "summary": "Incorrect.",
-            "mistake": "Check your arithmetic.",
-            "working": working,
-        })
 
     return format_mcq(question, E, options_data, "J")
 
