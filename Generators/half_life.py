@@ -12,7 +12,7 @@ HALF_LIFE_OPTIONS = [
 # All divisible by 8 so n=1,2,3 half-lives give clean integer results
 A0_OPTIONS = [800, 1600, 3200, 6400]
 
-N_OPTIONS = [1, 2, 3]
+N_OPTIONS = [2, 3]
 
 
 def round_sf(value, sf=3):
@@ -46,35 +46,39 @@ def _pick_distractors(candidates_with_mistakes, correct_val):
 # =========================================================
 
 def _forward_working(A0, n, T_half, t_total, t_unit):
-    steps = [
+    # Build arrow chain: A0 → A0/2 → A0/4 → …
+    values = [A0]
+    current = A0
+    for _ in range(n):
+        current = current // 2
+        values.append(current)
+    arrow_chain = r" \rightarrow ".join(str(v) for v in values)
+
+    return [
         {"type": "text", "content": "Find the number of half-lives that have passed:"},
         {"type": "latex",
          "content": rf"n = \frac{{t}}{{T_{{1/2}}}} = \frac{{{t_total}}}{{{T_half}}} = {n}"},
         {"type": "text", "content": "Halve the activity once for each half-life:"},
+        {"type": "latex", "content": rf"{arrow_chain}\ \mathrm{{Bq}}"},
     ]
-    current = A0
-    for _ in range(n):
-        nxt = current // 2
-        steps.append({"type": "latex",
-                       "content": rf"{current}\ \div\ 2 = {nxt}\ \mathrm{{Bq}}"})
-        current = nxt
-    return steps
 
 
 def _backward_working(A_now, n, T_half, t_total, t_unit):
-    steps = [
+    # Build arrow chain going backwards: A_now → 2A → 4A → …
+    values = [A_now]
+    current = A_now
+    for _ in range(n):
+        current = current * 2
+        values.append(current)
+    arrow_chain = r" \rightarrow ".join(str(v) for v in values)
+
+    return [
         {"type": "text", "content": "Find the number of half-lives to go back:"},
         {"type": "latex",
          "content": rf"n = \frac{{t}}{{T_{{1/2}}}} = \frac{{{t_total}}}{{{T_half}}} = {n}"},
         {"type": "text", "content": "Double the activity once for each half-life going backwards:"},
+        {"type": "latex", "content": rf"{arrow_chain}\ \mathrm{{Bq}}"},
     ]
-    current = A_now
-    for _ in range(n):
-        nxt = current * 2
-        steps.append({"type": "latex",
-                       "content": rf"{current}\ \times\ 2 = {nxt}\ \mathrm{{Bq}}"})
-        current = nxt
-    return steps
 
 
 def _half_life_working(A0, A_final, n, t_total, T_half):
