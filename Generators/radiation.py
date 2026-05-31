@@ -42,13 +42,19 @@ def pick_mass():
 
 
 def _wu(val):
-    """Sentinel for first wrong-unit distractor (negative, always distinct from positive correct)."""
+    """Sentinel for a wrong-unit distractor (negative, always distinct from positive correct)."""
     return -abs(val)
 
 
-def _wu2(val):
-    """Sentinel for second wrong-unit distractor (always distinct from _wu)."""
-    return -(abs(val) * 2 + 1)
+def _wu_alt(val, other_val):
+    """Sentinel for second wrong-unit option, ensuring it differs from _wu(other_val).
+
+    When val == other_val the two sentinels would collide; returns a fallback sentinel.
+    """
+    s = -abs(val)
+    if round_sf(s) == round_sf(_wu(other_val)):
+        return -(abs(val) + 0.001)
+    return s
 
 
 # =========================================================
@@ -127,7 +133,8 @@ def _E_working(D, mass_kg, E, is_grams, mass_g):
 # MCQ BUILDERS
 # =========================================================
 
-def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g, D):
+def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g, D, H):
+    """Find absorbed dose D = E/m. Two wrong-unit distractors both in Sv: D Sv and H Sv."""
     working = _D_working(E, mass_kg, D, is_grams, mass_g)
 
     if is_grams:
@@ -141,6 +148,10 @@ def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g,
         content_val = mult_error
         content_mistake = "You multiplied E × m instead of dividing. D = E ÷ m."
 
+    # WU1: correct number D in wrong unit Sv
+    # WU2: equivalent dose H in Sv (different number); if H==D (w_R=1), use D×20
+    h_sv = H if round_sf(H) != round_sf(D) else D * 20
+
     options_data = [
         {"value": D,
          "summary": "Correct!", "mistake": None, "working": working},
@@ -149,10 +160,10 @@ def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g,
          "mistake": "Absorbed dose is measured in Gray (Gy), not Sievert (Sv). "
                     "Sievert is used for equivalent dose.",
          "working": working},
-        {"value": _wu2(D), "display": f"{round_sf(D)} J",
+        {"value": _wu_alt(h_sv, D), "display": f"{round_sf(h_sv)} Sv",
          "summary": "Incorrect.",
-         "mistake": "Absorbed dose is measured in Gray (Gy), not Joules. "
-                    "Joules measure energy; D = E ÷ m gives Gray.",
+         "mistake": "Absorbed dose is measured in Gray (Gy), not Sievert (Sv). "
+                    "Also check you have used the correct equation for this quantity.",
          "working": working},
         {"value": content_val,
          "summary": "Incorrect.", "mistake": content_mistake, "working": working},
@@ -162,17 +173,20 @@ def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g,
 
 
 def _make_H_mcq(question, D, w_R, H):
+    """Find equivalent dose H = D × w_R. Two wrong-unit distractors both in Gy: H Gy and D Gy."""
     working = _H_working(D, w_R, H)
 
-    # Wrong-w_R content distractor
     wrong_wRs = [x for x in [1, 3, 20] if x != w_R]
     if w_R == 1:
-        # D/w_R = D = H when w_R=1 — use a wrong-w_R multiply instead
         content_val = round_sf(D * wrong_wRs[0])
         content_mistake = "Check the radiation weighting factor in the table for this type of radiation."
     else:
         content_val = round_sf(D / w_R)
         content_mistake = "You divided D by w_R instead of multiplying. H = D × w_R."
+
+    # WU1: correct number H in wrong unit Gy
+    # WU2: absorbed dose D in Gy (different number); if D==H (w_R=1), use H/20
+    d_gy = D if round_sf(D) != round_sf(H) else H / 20
 
     options_data = [
         {"value": H,
@@ -182,10 +196,10 @@ def _make_H_mcq(question, D, w_R, H):
          "mistake": "Equivalent dose is measured in Sievert (Sv), not Gray (Gy). "
                     "Gray is used for absorbed dose.",
          "working": working},
-        {"value": _wu2(H), "display": f"{round_sf(H)} Sv/h",
+        {"value": _wu_alt(d_gy, H), "display": f"{round_sf(d_gy)} Gy",
          "summary": "Incorrect.",
-         "mistake": "Equivalent dose is measured in Sievert (Sv), not Sv/h. "
-                    "Sv/h is used for dose rate.",
+         "mistake": "Equivalent dose is measured in Sievert (Sv), not Gray (Gy). "
+                    "Also check you have used the correct equation for this quantity.",
          "working": working},
         {"value": content_val,
          "summary": "Incorrect.", "mistake": content_mistake, "working": working},
@@ -195,8 +209,10 @@ def _make_H_mcq(question, D, w_R, H):
 
 
 def _make_Hdot_mcq(question, H, t_h, dose_rate):
+    """Find dose rate Ḣ = H/t. Two wrong-unit distractors both in Sv: Ḣ Sv and H Sv."""
     working = _Hdot_working(H, t_h, dose_rate)
 
+    # H = dose_rate × t_h (t_h ≥ 2), so H ≠ dose_rate always
     forgot_t = round_sf(H)
 
     options_data = [
@@ -204,13 +220,13 @@ def _make_Hdot_mcq(question, H, t_h, dose_rate):
          "summary": "Correct!", "mistake": None, "working": working},
         {"value": _wu(dose_rate), "display": f"{round_sf(dose_rate)} Sv",
          "summary": "Incorrect.",
-         "mistake": "Dose rate is measured in Sv/h, not Sv. "
-                    "Sv measures total equivalent dose; divide by time to get the rate.",
+         "mistake": "Equivalent dose rate is measured in Sv/h, not Sv. "
+                    "Sv measures total equivalent dose; Sv/h is the rate.",
          "working": working},
-        {"value": _wu2(dose_rate), "display": f"{round_sf(dose_rate)} Gy",
+        {"value": _wu_alt(H, dose_rate), "display": f"{round_sf(H)} Sv",
          "summary": "Incorrect.",
-         "mistake": "Dose rate is measured in Sv/h, not Gy. "
-                    "Gray measures absorbed dose; equivalent dose rate uses Sv/h.",
+         "mistake": "Equivalent dose rate is measured in Sv/h, not Sv. "
+                    "This is the total equivalent dose — divide by time to get the rate.",
          "working": working},
         {"value": forgot_t,
          "summary": "Incorrect.",
@@ -222,10 +238,15 @@ def _make_Hdot_mcq(question, H, t_h, dose_rate):
     return format_mcq(question, dose_rate, options_data, "Sv/h")
 
 
-def _make_H_from_rate_mcq(question, dose_rate, t_h, H):
+def _make_H_from_rate_mcq(question, dose_rate, t_h, H, D):
+    """Find equivalent dose H = Ḣ × t. Two wrong-unit distractors both in Gy: H Gy and D Gy."""
     working = _H_from_rate_working(dose_rate, t_h, H)
 
     div_error = round_sf(dose_rate / t_h)
+
+    # WU1: correct number H in wrong unit Gy
+    # WU2: absorbed dose D in Gy (different number); if D==H (w_R=1), use H/20
+    d_gy = D if round_sf(D) != round_sf(H) else H / 20
 
     options_data = [
         {"value": H,
@@ -235,10 +256,10 @@ def _make_H_from_rate_mcq(question, dose_rate, t_h, H):
          "mistake": "Equivalent dose is measured in Sievert (Sv), not Gray (Gy). "
                     "Gray is used for absorbed dose.",
          "working": working},
-        {"value": _wu2(H), "display": f"{round_sf(H)} Sv/h",
+        {"value": _wu_alt(d_gy, H), "display": f"{round_sf(d_gy)} Gy",
          "summary": "Incorrect.",
-         "mistake": "Equivalent dose is measured in Sievert (Sv), not Sv/h. "
-                    "Sv/h is the unit for dose rate.",
+         "mistake": "Equivalent dose is measured in Sievert (Sv), not Gray (Gy). "
+                    "Also check you have used the correct equation for this quantity.",
          "working": working},
         {"value": div_error,
          "summary": "Incorrect.",
@@ -250,11 +271,16 @@ def _make_H_from_rate_mcq(question, dose_rate, t_h, H):
 
 
 def _make_D_from_H_mcq(question, H, w_R, D):
+    """Find absorbed dose D = H/w_R. Two wrong-unit distractors both in Sv: D Sv and H Sv."""
     working = _D_from_H_working(H, w_R, D)
 
     mult_error = round_sf(H * w_R)
     if round_sf(mult_error) == round_sf(D):
         mult_error = round_sf(D * 2)
+
+    # WU1: correct number D in wrong unit Sv
+    # WU2: equivalent dose H in Sv (different number); if H==D (w_R=1), use D×20
+    h_sv = H if round_sf(H) != round_sf(D) else D * 20
 
     options_data = [
         {"value": D,
@@ -264,10 +290,10 @@ def _make_D_from_H_mcq(question, H, w_R, D):
          "mistake": "Absorbed dose is measured in Gray (Gy), not Sievert (Sv). "
                     "Sievert is used for equivalent dose.",
          "working": working},
-        {"value": _wu2(D), "display": f"{round_sf(D)} J",
+        {"value": _wu_alt(h_sv, D), "display": f"{round_sf(h_sv)} Sv",
          "summary": "Incorrect.",
-         "mistake": "Absorbed dose is measured in Gray (Gy), not Joules. "
-                    "Gray = J/kg; the mass is already accounted for.",
+         "mistake": "Absorbed dose is measured in Gray (Gy), not Sievert (Sv). "
+                    "Also check you have used the correct equation for this quantity.",
          "working": working},
         {"value": mult_error,
          "summary": "Incorrect.",
@@ -279,6 +305,7 @@ def _make_D_from_H_mcq(question, H, w_R, D):
 
 
 def _make_E_mcq(question, D, mass_display, mass_unit, mass_kg, is_grams, mass_g, E):
+    """Find energy E = D × m. Two wrong-unit distractors both in Gy: E Gy and D Gy."""
     working = _E_working(D, mass_kg, E, is_grams, mass_g)
 
     if is_grams:
@@ -292,6 +319,10 @@ def _make_E_mcq(question, D, mass_display, mass_unit, mass_kg, is_grams, mass_g,
         content_val = inv_error
         content_mistake = "You divided D by m instead of multiplying. E = D × m."
 
+    # WU1: correct number E in wrong unit Gy
+    # WU2: absorbed dose D in Gy (different number); if D==E (m=1 kg), use E×2
+    d_gy = D if round_sf(D) != round_sf(E) else E * 2
+
     options_data = [
         {"value": E,
          "summary": "Correct!", "mistake": None, "working": working},
@@ -300,10 +331,10 @@ def _make_E_mcq(question, D, mass_display, mass_unit, mass_kg, is_grams, mass_g,
          "mistake": "Energy is measured in Joules (J), not Gray. "
                     "Gray = J/kg and is used for absorbed dose.",
          "working": working},
-        {"value": _wu2(E), "display": f"{round_sf(E)} Sv",
+        {"value": _wu_alt(d_gy, E), "display": f"{round_sf(d_gy)} Gy",
          "summary": "Incorrect.",
-         "mistake": "Energy is measured in Joules (J), not Sievert. "
-                    "Sievert is used for equivalent dose.",
+         "mistake": "Energy is measured in Joules (J), not Gray. "
+                    "Also check you have used the correct equation for this quantity.",
          "working": working},
         {"value": content_val,
          "summary": "Incorrect.", "mistake": content_mistake, "working": working},
@@ -343,7 +374,7 @@ def generate_forward_scenario():
 
     q1 = _make_D_mcq(
         f"{context}\n\nCalculate the absorbed dose.",
-        E, mass_display, mass_unit, mass_kg, is_grams, mass_g, D,
+        E, mass_display, mass_unit, mass_kg, is_grams, mass_g, D, H,
     )
     q2 = _make_H_mcq(
         f"{context}\n\nUsing your answer to part 1, calculate the equivalent dose.",
@@ -373,7 +404,7 @@ def generate_reverse_scenario():
 
     q1 = _make_H_from_rate_mcq(
         f"{context}\n\nCalculate the equivalent dose.",
-        dose_rate, t_h, H,
+        dose_rate, t_h, H, D,
     )
     q2 = _make_D_from_H_mcq(
         f"{context}\n\nUsing your answer to part 1, calculate the absorbed dose.",
