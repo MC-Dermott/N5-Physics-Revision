@@ -1,6 +1,7 @@
 import random
 import math
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 def round_sf(value, sf=3):
@@ -226,7 +227,9 @@ def make_find_T_mcq():
             "working": working,
         })
 
-    return format_mcq(question, T_disp, options_data, T_unit)
+    return format_mcq(question, T_disp, options_data, T_unit,
+                      scaffold=[{"question": "Calculate the period.", "answer": T_disp, "unit": T_unit}],
+                      notes=NOTES["waves_period"])
 
 
 def make_find_f_mcq():
@@ -294,7 +297,134 @@ def make_find_f_mcq():
         "working": working,
     })
 
-    return format_mcq(question, f_Hz, options_data, f_unit)
+    return format_mcq(question, f_Hz, options_data, f_unit,
+                      scaffold=[{"question": "Calculate the frequency.", "answer": f_Hz, "unit": f_unit}],
+                      notes=NOTES["waves_period"])
+
+
+# =========================================================
+# f = N/t  —  FIND f
+# =========================================================
+
+_COUNT_SCENARIOS = [
+    # (N, t_disp, t_unit, t_si)
+    (20,   10,  "s",       10),
+    (50,   5,   "s",       5),
+    (100,  20,  "s",       20),
+    (200,  40,  "s",       40),
+    (300,  60,  "s",       60),
+    (500,  100, "s",       100),
+    (60,   1,   "minutes", 60),
+    (120,  2,   "minutes", 120),
+    (300,  5,   "minutes", 300),
+    (600,  10,  "minutes", 600),
+    (1200, 20,  "minutes", 1200),
+    (30,   10,  "s",       10),
+    (80,   20,  "s",       20),
+    (250,  50,  "s",       50),
+]
+
+
+def make_find_f_from_count_mcq():
+    sc = random.choice(_COUNT_SCENARIOS)
+    N, t_disp, t_unit, t_si = sc
+    correct_f = N / t_si
+
+    multiplied = round_sf(N * t_si)
+    inverted   = round_sf(t_si / N)
+
+    if t_unit != "s":
+        no_conv = round_sf(N / t_disp)
+        no_conv_msg = (
+            f"You used t = {t_disp} without converting from {t_unit} to seconds. "
+            f"{t_disp} {t_unit} = {t_si} s."
+        )
+    else:
+        no_conv = round_sf(N + t_si)
+        no_conv_msg = "You added N and t instead of dividing. f = N ÷ t."
+
+    steps = [
+        {"type": "text", "content": "Use the equation:"},
+        {"type": "latex", "content": r"f = \frac{N}{t}"},
+    ]
+    if t_unit != "s":
+        steps.append({"type": "latex", "content":
+                       rf"t = {t_disp}\ \mathrm{{{t_unit}}} = {t_si}\ \mathrm{{s}}"})
+    steps += [
+        {"type": "latex", "content": rf"f = \frac{{{N}}}{{{t_si}}}"},
+        {"type": "latex", "content": rf"f = {round_sf(correct_f)}\ \mathrm{{Hz}}"},
+    ]
+
+    question = (
+        f"{N} complete waves pass a point in {t_disp} {t_unit}.\n\n"
+        f"Calculate the frequency."
+    )
+
+    options_data = [
+        {"value": correct_f, "display": opt_display(correct_f, "Hz"), "summary": "Correct!",    "mistake": None,                                                            "working": steps},
+        {"value": multiplied,"display": opt_display(multiplied, "Hz"),"summary": "Incorrect.", "mistake": "You multiplied N × t instead of dividing. f = N ÷ t.",             "working": steps},
+        {"value": inverted,  "display": opt_display(inverted, "Hz"),  "summary": "Incorrect.", "mistake": "You divided t by N instead of N by t. f = N ÷ t.",                 "working": steps},
+        {"value": no_conv,   "display": opt_display(no_conv, "Hz"),   "summary": "Incorrect.", "mistake": no_conv_msg,                                                        "working": steps},
+    ]
+
+    return format_mcq(question, correct_f, options_data, "Hz",
+                      scaffold=[{"question": "Calculate the frequency.", "answer": correct_f, "unit": "Hz"}],
+                      notes=NOTES["waves_period"])
+
+
+def make_find_N_mcq():
+    sc = random.choice(_COUNT_SCENARIOS)
+    N, t_disp, t_unit, t_si = sc
+    f = N / t_si
+    f_disp, f_unit = best_freq(f)
+    correct = float(N)
+
+    divided  = round_sf(f / t_si)
+    inverted = round_sf(t_si / f)
+
+    if f_unit != "Hz":
+        no_conv = round_sf(f_disp * t_si)
+        no_conv_msg = (
+            f"You used f = {f_disp} without converting from {f_unit} to Hz. "
+            f"{f_disp} {f_unit} = {f} Hz."
+        )
+    elif t_unit != "s":
+        no_conv = round_sf(f * t_disp)
+        no_conv_msg = (
+            f"You used t = {t_disp} without converting from {t_unit} to seconds. "
+            f"{t_disp} {t_unit} = {t_si} s."
+        )
+    else:
+        no_conv = round_sf(f + t_si)
+        no_conv_msg = "You added f and t instead of multiplying. N = f × t."
+
+    steps = [
+        {"type": "text", "content": "Rearrange f = N/t to find N:"},
+        {"type": "latex", "content": r"N = ft"},
+    ]
+    if t_unit != "s":
+        steps.append({"type": "latex", "content":
+                       rf"t = {t_disp}\ \mathrm{{{t_unit}}} = {t_si}\ \mathrm{{s}}"})
+    steps += [
+        {"type": "latex", "content": rf"N = {f} \times {t_si}"},
+        {"type": "latex", "content": rf"N = {int(correct)}\ \mathrm{{waves}}"},
+    ]
+
+    question = (
+        f"A wave has a frequency of {f_disp} {f_unit}.\n\n"
+        f"How many complete waves pass a point in {t_disp} {t_unit}?"
+    )
+
+    options_data = [
+        {"value": correct,  "display": str(int(correct)),       "summary": "Correct!",    "mistake": None,                                                           "working": steps},
+        {"value": divided,  "display": opt_display(divided, ""),"summary": "Incorrect.", "mistake": "You divided f by t instead of multiplying. N = f × t.",           "working": steps},
+        {"value": inverted, "display": opt_display(inverted, ""),"summary": "Incorrect.","mistake": "You divided t by f. N = f × t.",                                  "working": steps},
+        {"value": no_conv,  "display": opt_display(no_conv, ""),"summary": "Incorrect.", "mistake": no_conv_msg,                                                       "working": steps},
+    ]
+
+    return format_mcq(question, correct, options_data, "waves",
+                      scaffold=[{"question": "Calculate the number of waves.", "answer": correct, "unit": "waves"}],
+                      notes=NOTES["waves_period"])
 
 
 # =========================================================
@@ -303,7 +433,7 @@ def make_find_f_mcq():
 
 def generate_period_frequency_mcqs(num=5):
     questions = []
-    generators = [make_find_T_mcq, make_find_f_mcq]
+    generators = [make_find_T_mcq, make_find_f_mcq, make_find_f_from_count_mcq, make_find_N_mcq]
     for _ in range(num):
         questions.append(random.choice(generators)())
     return questions

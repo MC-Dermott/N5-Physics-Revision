@@ -1,13 +1,16 @@
 import streamlit as st
 
 from Generators.acceleration import generate_mcq_acc
+from Generators.speed_distance_time import generate_sdt_mcqs
 from Generators.current import generate_mcq_current
+from Generators.ohms_law import generate_ohms_law_mcqs
 from Generators.forces import generate_mcq_forces
 from Generators.projectiles import generate_projectile_mcqs
 from Generators.vectors2 import generate_mcq_vectors
 from Generators.gas_laws import generate_gas_law_mcqs
 from Generators.weight import generate_mcq_wmg
 from Generators.energy import generate_energy_quiz
+from Generators.radiation_activity import generate_activity_mcqs
 from Generators.potential_divider_generator import generate_potential_divider_mcq
 from Generators.transistor_generator import generate_fixed_5v_potential_divider_quiz
 from Generators.complex_circuit_generator import generate_parallel_series_quiz
@@ -19,6 +22,7 @@ from Generators.half_life import generate_half_life_mcqs
 from Generators.wave_speed import generate_wave_speed_mcqs
 from Generators.period_frequency import generate_period_frequency_mcqs
 from Generators.waves_combined import generate_waves_combined_mcqs
+from Generators.electrical_power import generate_mcq_power, generate_mcq_pet
 
 
 # =========================================================
@@ -27,6 +31,7 @@ from Generators.waves_combined import generate_waves_combined_mcqs
 
 units = {
     "Dynamics": {
+        "Speed, Distance and Time Questions": generate_sdt_mcqs,
         "Acceleration Questions": generate_mcq_acc,
         "Forces Questions": generate_mcq_forces,
         "Projectile Questions": generate_projectile_mcqs,
@@ -37,6 +42,9 @@ units = {
 
     "Electricity": {
         "Current Questions": generate_mcq_current,
+        "Ohm's Law Questions": generate_ohms_law_mcqs,
+        "Electrical Power Questions": generate_mcq_power,
+        "Power from Energy Questions": generate_mcq_pet,
         "Potential Divider Questions": generate_potential_divider_mcq,
         "Transistor Questions": generate_fixed_5v_potential_divider_quiz,
         "Complex Circuit Questions": generate_parallel_series_quiz,
@@ -46,6 +54,7 @@ units = {
     "Radiation": {
         "Radiation Questions": generate_radiation_scenarios,
         "Half-Life Questions": generate_half_life_mcqs,
+        "Activity Questions": generate_activity_mcqs,
     },
 
     "Waves": {
@@ -86,6 +95,61 @@ def init_quiz(unit, topic):
         "completed": False,
         "wrong_answers": []
     }
+
+
+# =========================================================
+# SCAFFOLD HELPERS
+# =========================================================
+
+def answer_is_correct(user_input, expected):
+    """2% relative tolerance; handles commas, spaces, scientific notation."""
+    try:
+        student = float(str(user_input).replace(',', '').strip())
+        if abs(expected) < 1e-9:
+            return abs(student) < 0.01
+        return abs(student - expected) / abs(expected) <= 0.02
+    except (ValueError, TypeError, AttributeError):
+        return False
+
+
+def render_notes(q):
+    notes = q.get("notes", "")
+    if notes:
+        with st.expander("📚 Summary Notes"):
+            st.markdown(notes)
+
+
+def render_scaffold(q, key_prefix):
+    steps = q.get("scaffold", [])
+    if not steps:
+        return
+    with st.expander("🔍 Step-by-step scaffold"):
+        for i, step in enumerate(steps):
+            st.markdown(f"**Step {i+1}:** {step['question']}")
+            input_key = f"scaf_{key_prefix}_{i}_inp"
+            checked_key = f"scaf_{key_prefix}_{i}_chk"
+            correct_key = f"scaf_{key_prefix}_{i}_ok"
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                user_val = st.text_input(
+                    f"Answer (in {step['unit']}):",
+                    key=input_key,
+                    label_visibility="visible"
+                )
+            with col2:
+                st.write("")
+                st.write("")
+                if st.button("Check", key=f"scaf_{key_prefix}_{i}_btn"):
+                    ok = answer_is_correct(user_val, step["answer"])
+                    st.session_state[checked_key] = True
+                    st.session_state[correct_key] = ok
+            if st.session_state.get(checked_key):
+                if st.session_state.get(correct_key):
+                    st.success("✓ Correct!")
+                else:
+                    st.error("✗ Not quite — check your working and try again.")
+            if i < len(steps) - 1:
+                st.divider()
 
 
 # =========================================================
@@ -197,6 +261,9 @@ if isinstance(current_item, list):
 
         st.write(q["question"])
 
+        render_notes(q)
+        render_scaffold(q, f"{scenario_id}_{part_num}")
+
         key = f"{scenario_id}_{part_num}"
 
         if key in quiz["submitted"]:
@@ -273,6 +340,9 @@ else:
     render_diagram(q)
 
     st.write(q["question"])
+
+    render_notes(q)
+    render_scaffold(q, f"single_{quiz['index']}")
 
     key = f"single_{quiz['index']}"
 
