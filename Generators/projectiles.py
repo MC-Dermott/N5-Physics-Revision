@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 g = 9.8
 
@@ -99,7 +100,9 @@ def generate_mcq_range(s):
                 "working": working
             }
         ],
-        "m"
+        "m",
+        scaffold=[{"question": "Calculate the horizontal range.", "answer": correct, "unit": "m"}],
+        notes=NOTES["projectiles"]
     )
 
 
@@ -142,7 +145,9 @@ def generate_mcq_vertical_velocity(s):
                 "working": working
             }
         ],
-        "m/s"
+        "m/s",
+        scaffold=[{"question": "Calculate the vertical velocity at impact.", "answer": correct, "unit": "m/s"}],
+        notes=NOTES["projectiles"]
     )
 
 
@@ -185,7 +190,12 @@ def generate_mcq_height(s):
                 "working": working
             }
         ],
-        "m"
+        "m",
+        scaffold=[
+            {"question": "Sketch a velocity-time graph.", "answer": None},
+            {"question": "Calculate the height fallen.", "answer": correct, "unit": "m"},
+        ],
+        notes=NOTES["projectiles"]
     )
 
 

@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 from utils.circuit_utils import make_distractors
 
 # =========================================================
@@ -130,7 +131,17 @@ Calculate the voltage across {target}.
             }
         ]
 
-        return question, correct, options_data, "V", diagram
+        if target == "R1":
+            step2_question = "Calculate the voltage across R1."
+        else:
+            step2_question = f"Calculate the voltage across the parallel combination ({target})."
+
+        scaffold = [
+            {"question": "Calculate the total current in the circuit.", "answer": round(i_total, 3), "unit": "A"},
+            {"question": step2_question, "answer": correct, "unit": "V"},
+        ]
+
+        return question, correct, options_data, "V", diagram, scaffold
 
 
 # =========================================================
@@ -205,7 +216,12 @@ Calculate the voltage across R1.
             }
         ]
 
-        return question, correct, options_data, "V", diagram
+        scaffold = [
+            {"question": "Calculate the total current in the circuit.", "answer": round(i_total, 3), "unit": "A"},
+            {"question": "Calculate the voltage across R1.", "answer": correct, "unit": "V"},
+        ]
+
+        return question, correct, options_data, "V", diagram, scaffold
 
 
 # =========================================================
@@ -232,13 +248,15 @@ def generate_parallel_series_quiz(num_questions=5):
 
         raw = generate_single_mcq()
 
-        question, correct, options_data, unit, diagram = raw
+        question, correct, options_data, unit, diagram, scaffold = raw
 
         formatted = format_mcq(
             question,
             correct,
             options_data,
-            unit
+            unit,
+            scaffold=scaffold,
+            notes=NOTES["electricity_current"]
         )
 
         formatted["diagram"] = diagram

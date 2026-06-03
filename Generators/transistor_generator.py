@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 from utils.circuit_utils import generate_resistance, make_distractors
 
 
@@ -108,7 +109,12 @@ Calculate the voltage across the {name}.
             {"value": distractors[2], "summary": "Incorrect.", "mistake": "You may have used the wrong resistor.", "working": full_working},
         ]
 
-        return question, correct, options_data, "V", diagram
+        scaffold = [
+            {"question": "Calculate the current in the circuit.", "answer": current, "unit": "mA"},
+            {"question": f"Calculate the voltage across the {name}.", "answer": correct, "unit": "V"},
+        ]
+
+        return question, correct, options_data, "V", diagram, scaffold
 
 
 # =========================================================
@@ -175,7 +181,12 @@ Calculate the voltage across the {target_name}.
             {"value": distractors[2], "summary": "Incorrect.", "mistake": "You may have confused resistors.", "working": full_working},
         ]
 
-        return question, correct, options_data, "V", diagram
+        scaffold = [
+            {"question": "Calculate the current in the circuit.", "answer": current, "unit": "mA"},
+            {"question": f"Calculate the voltage across the {target_name}.", "answer": correct, "unit": "V"},
+        ]
+
+        return question, correct, options_data, "V", diagram, scaffold
 
 
 # =========================================================
@@ -200,9 +211,10 @@ def generate_fixed_5v_potential_divider_quiz(num_questions=5):
 
     for _ in range(num_questions):
 
-        question, correct, options_data, unit, diagram = generate_single_mcq()
+        question, correct, options_data, unit, diagram, scaffold = generate_single_mcq()
 
-        formatted = format_mcq(question, correct, options_data, unit)
+        formatted = format_mcq(question, correct, options_data, unit,
+                               scaffold=scaffold, notes=NOTES["electricity_current"])
 
         formatted["diagram"] = diagram
 

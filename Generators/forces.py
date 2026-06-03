@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -179,7 +180,14 @@ def generate_missing_friction():
         }
     ]
 
-    return question, correct_val, options_data, unit
+    return format_mcq(
+        question, correct_val, options_data, unit,
+        scaffold=[
+            {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},
+            {"question": "Calculate the frictional force.", "answer": correct_val, "unit": "N"},
+        ],
+        notes=NOTES["dynamics_newton"]
+    )
 
 
 def generate_missing_driving():
@@ -233,7 +241,14 @@ def generate_missing_driving():
         }
     ]
 
-    return question, correct_val, options_data, unit
+    return format_mcq(
+        question, correct_val, options_data, unit,
+        scaffold=[
+            {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},
+            {"question": "Calculate the driving force.", "answer": correct_val, "unit": "N"},
+        ],
+        notes=NOTES["dynamics_newton"]
+    )
 
 
 def generate_missing_acceleration():
@@ -287,7 +302,14 @@ def generate_missing_acceleration():
         }
     ]
 
-    return question, correct_val, options_data, unit
+    return format_mcq(
+        question, correct_val, options_data, unit,
+        scaffold=[
+            {"question": "Calculate the unbalanced force.", "answer": resultant, "unit": "N"},
+            {"question": "Calculate the acceleration.", "answer": correct_val, "unit": "m/s²"},
+        ],
+        notes=NOTES["dynamics_newton"]
+    )
 
 
 # =========================================================
@@ -309,8 +331,7 @@ def generate_mcq_forces():
     questions = []
 
     for _ in range(5):
-        raw = generate_single_mcq_forces()
-        formatted = format_mcq(*raw)
+        formatted = generate_single_mcq_forces()
         questions.append(formatted)
 
     return questions

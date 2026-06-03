@@ -1,6 +1,7 @@
 import random
 
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -64,13 +65,16 @@ def generate_circuit_quiz():
 
         raw = question_func()
 
-        question, correct, options_data, unit, diagram = raw
+        question, correct, options_data, unit, diagram, *rest = raw
+        scaffold = rest[0] if rest else []
 
         formatted = format_mcq(
             question,
             correct,
             options_data,
-            unit
+            unit,
+            scaffold=scaffold,
+            notes=NOTES["electricity_current"]
         )
 
         # attach diagram so Streamlit can render it

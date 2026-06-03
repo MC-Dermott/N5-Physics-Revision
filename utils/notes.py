@@ -26,6 +26,31 @@ $$v = \\frac{d}{t} \\qquad t = \\frac{d}{v}$$
 > **Important:** Always convert distance to metres and time to seconds before substituting.
 """,
 
+    "resistor_combinations": """
+## Resistor Combinations
+
+**Series** (resistors in a single chain):
+$$R_T = R_1 + R_2 + R_3$$
+
+**Parallel** (resistors across the same two points):
+$$\\frac{1}{R_T} = \\frac{1}{R_1} + \\frac{1}{R_2} + \\frac{1}{R_3}$$
+
+For two resistors in parallel this simplifies to:
+$$R_T = \\frac{R_1 \\times R_2}{R_1 + R_2}$$
+
+**Mixed circuits — work step by step:**
+1. Identify the pair that is combined first (series or parallel)
+2. Replace that pair with its equivalent resistance $R_{ab}$
+3. Combine $R_{ab}$ with the remaining resistor using the appropriate formula
+
+| Arrangement | Step 1 | Step 2 |
+|---|---|---|
+| $(R_1 + R_2) \\parallel R_3$ | $R_{12} = R_1 + R_2$ | $R_T = \\frac{R_{12} \\times R_3}{R_{12} + R_3}$ |
+| $(R_1 \\parallel R_2) + R_3$ | $R_{12} = \\frac{R_1 R_2}{R_1 + R_2}$ | $R_T = R_{12} + R_3$ |
+
+> **Important:** In parallel, the total resistance is always **less** than the smallest individual resistor.
+""",
+
     "ohms_law": """
 ## Ohm's Law — $V = IR$
 

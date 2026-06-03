@@ -4,6 +4,7 @@ from Generators.acceleration import generate_mcq_acc
 from Generators.speed_distance_time import generate_sdt_mcqs
 from Generators.current import generate_mcq_current
 from Generators.ohms_law import generate_ohms_law_mcqs
+from Generators.resistor_combinations import generate_resistor_combination_mcqs
 from Generators.forces import generate_mcq_forces
 from Generators.projectiles import generate_projectile_mcqs
 from Generators.vectors2 import generate_mcq_vectors
@@ -43,6 +44,7 @@ units = {
     "Electricity": {
         "Current Questions": generate_mcq_current,
         "Ohm's Law Questions": generate_ohms_law_mcqs,
+        "Resistor Combinations": generate_resistor_combination_mcqs,
         "Electrical Power Questions": generate_mcq_power,
         "Power from Energy Questions": generate_mcq_pet,
         "Potential Divider Questions": generate_potential_divider_mcq,
@@ -126,6 +128,13 @@ def render_scaffold(q, key_prefix):
     with st.expander("🔍 Step-by-step scaffold"):
         for i, step in enumerate(steps):
             st.markdown(f"**Step {i+1}:** {step['question']}")
+
+            # Hint-only step — no numerical input required
+            if step.get("answer") is None:
+                if i < len(steps) - 1:
+                    st.divider()
+                continue
+
             input_key = f"scaf_{key_prefix}_{i}_inp"
             checked_key = f"scaf_{key_prefix}_{i}_chk"
             correct_key = f"scaf_{key_prefix}_{i}_ok"

@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 from utils.circuit_utils import generate_resistance, make_distractors
 
 
@@ -139,12 +140,18 @@ Calculate the voltage across {target}.
             }
         ]
 
+        scaffold = [
+            {"question": "Calculate the current in the circuit.", "answer": current, "unit": "mA"},
+            {"question": f"Calculate the voltage across {target}.", "answer": correct, "unit": "V"},
+        ]
+
         return (
             question,
             correct,
             options_data,
             "V",
-            "images/potential_divider.png"
+            "images/potential_divider.png",
+            scaffold
         )
 
 
@@ -233,12 +240,18 @@ Calculate the voltage across the other resistor.
             }
         ]
 
+        scaffold = [
+            {"question": "Calculate the current in the circuit.", "answer": current, "unit": "mA"},
+            {"question": "Calculate the voltage across the other resistor.", "answer": correct, "unit": "V"},
+        ]
+
         return (
             question,
             correct,
             options_data,
             "V",
-            "images/potential_divider.png"
+            "images/potential_divider.png",
+            scaffold
         )
 
 
@@ -266,13 +279,15 @@ def generate_potential_divider_mcq(num_questions=5):
 
         raw = generate_single_potential_divider_mcq()
 
-        question, correct, options_data, unit, diagram = raw
+        question, correct, options_data, unit, diagram, scaffold = raw
 
         formatted = format_mcq(
             question,
             correct,
             options_data,
-            unit
+            unit,
+            scaffold=scaffold,
+            notes=NOTES["electricity_current"]
         )
 
         formatted["diagram"] = diagram
