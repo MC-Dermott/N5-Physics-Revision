@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -150,7 +151,11 @@ def generate_current_question():
         }
     ]
 
-    return question, correct_val, options_data, unit
+    return format_mcq(
+        question, correct_val, options_data, unit,
+        scaffold=[],
+        notes=NOTES["electricity_current"]
+    )
 
 
 # =========================================================
@@ -220,7 +225,11 @@ def generate_charge_question():
         }
     ]
 
-    return question, correct_val, options_data, unit
+    return format_mcq(
+        question, correct_val, options_data, unit,
+        scaffold=[],
+        notes=NOTES["electricity_current"]
+    )
 
 
 # =========================================================
@@ -279,7 +288,11 @@ def generate_time_question():
         }
     ]
 
-    return question, correct_val, options_data, unit
+    return format_mcq(
+        question, correct_val, options_data, unit,
+        scaffold=[],
+        notes=NOTES["electricity_current"]
+    )
 
 
 # =========================================================
@@ -305,9 +318,7 @@ def generate_mcq_current():
 
     for _ in range(5):
 
-        raw_question = generate_single_mcq_current()
-
-        formatted = format_mcq(*raw_question)
+        formatted = generate_single_mcq_current()
 
         questions.append(formatted)
 

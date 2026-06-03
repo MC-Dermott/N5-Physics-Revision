@@ -101,7 +101,7 @@ def generate_mcq_range(s):
             }
         ],
         "m",
-        scaffold=[{"question": "Calculate the horizontal range.", "answer": correct, "unit": "m"}],
+        scaffold=[],
         notes=NOTES["projectiles"]
     )
 
@@ -146,7 +146,7 @@ def generate_mcq_vertical_velocity(s):
             }
         ],
         "m/s",
-        scaffold=[{"question": "Calculate the vertical velocity at impact.", "answer": correct, "unit": "m/s"}],
+        scaffold=[],
         notes=NOTES["projectiles"]
     )
 

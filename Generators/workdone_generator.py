@@ -1,6 +1,7 @@
 import random
 
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -10,6 +11,16 @@ def round_sf(value, sf=3):
     """Round to significant figures."""
 
     return float(f"{value:.{sf}g}")
+
+
+def fmt_J(j):
+    """Format a J value using SI prefixes for display."""
+    j = float(j)
+    if abs(j) >= 1_000_000:
+        return f"{j / 1_000_000:g} MJ"
+    if abs(j) >= 1000:
+        return f"{j / 1000:g} kJ"
+    return f"{j:g} J"
 
 
 # =========================================================
@@ -44,7 +55,7 @@ def make_working_workdone(
         {
             "type": "latex",
             "content":
-                rf"W = {answer}\ \mathrm{{J}}"
+                rf"W = {fmt_J(answer)}"
         }
     ]
 
@@ -72,7 +83,7 @@ def make_working_force(
         {
             "type": "latex",
             "content":
-                rf"F = \frac{{{workdone}}}{{{distance}}}"
+                rf"F = \frac{{{fmt_J(workdone)}}}{{{distance}}}"
         },
 
         {
@@ -106,7 +117,7 @@ def make_working_distance(
         {
             "type": "latex",
             "content":
-                rf"d = \frac{{{workdone}}}{{{force}}}"
+                rf"d = \frac{{{fmt_J(workdone)}}}{{{force}}}"
         },
 
         {
@@ -189,7 +200,7 @@ def generate_workdone_question():
 
         {
             "value": correct_val,
-
+            "display": fmt_J(correct_val),
             "summary":
                 "Correct!",
 
@@ -200,7 +211,7 @@ def generate_workdone_question():
 
         {
             "value": rearranged_answer,
-
+            "display": fmt_J(rearranged_answer),
             "summary":
                 "Incorrect.",
 
@@ -213,7 +224,7 @@ def generate_workdone_question():
 
         {
             "value": random_error,
-
+            "display": fmt_J(random_error),
             "summary":
                 "Incorrect.",
 
@@ -226,7 +237,7 @@ def generate_workdone_question():
 
         {
             "value": missing_multiplication,
-
+            "display": fmt_J(missing_multiplication),
             "summary":
                 "Incorrect.",
 
@@ -238,11 +249,13 @@ def generate_workdone_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_work"]
     )
 
 
@@ -276,8 +289,8 @@ def generate_force_question():
     question = (
 
         f"What force is needed to do "
-        f"{workdone}J of work over "
-        f"a distance of {distance}m?"
+        f"{fmt_J(workdone)} of work over "
+        f"a distance of {distance} m?"
     )
 
     working = make_working_force(
@@ -342,11 +355,13 @@ def generate_force_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_work"]
     )
 
 
@@ -380,8 +395,8 @@ def generate_distance_question():
     question = (
 
         f"How far does an object move "
-        f"if {workdone}J of work is done "
-        f"using a force of {force}N?"
+        f"if {fmt_J(workdone)} of work is done "
+        f"using a force of {force} N?"
     )
 
     working = make_working_distance(
@@ -446,11 +461,13 @@ def generate_distance_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_work"]
     )
 
 
@@ -484,12 +501,8 @@ def generate_mcq_workdone():
 
     for _ in range(5):
 
-        raw_question = (
+        formatted_question = (
             generate_single_mcq_workdone()
-        )
-
-        formatted_question = format_mcq(
-            *raw_question
         )
 
         questions.append(

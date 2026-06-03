@@ -179,7 +179,7 @@ def gen_pvi_find_p():
 
     return format_mcq(
         question, correct, options_data, "W",
-        scaffold=[{"question": "Calculate the power.", "answer": correct, "unit": "W"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -240,7 +240,7 @@ def gen_pvi_find_v():
 
     return format_mcq(
         question, correct, options_data, "V",
-        scaffold=[{"question": "Calculate the voltage.", "answer": correct, "unit": "V"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -301,7 +301,7 @@ def gen_pvi_find_i():
 
     return format_mcq(
         question, correct, options_data, "A",
-        scaffold=[{"question": "Calculate the current.", "answer": correct, "unit": "A"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -365,7 +365,7 @@ def gen_pv2r_find_p():
 
     return format_mcq(
         question, correct, options_data, "W",
-        scaffold=[{"question": "Calculate the power.", "answer": correct, "unit": "W"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -427,7 +427,7 @@ def gen_pv2r_find_v():
 
     return format_mcq(
         question, correct, options_data, "V",
-        scaffold=[{"question": "Calculate the voltage.", "answer": correct, "unit": "V"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -490,7 +490,7 @@ def gen_pv2r_find_r():
 
     return format_mcq(
         question, correct, options_data, "Ω",
-        scaffold=[{"question": "Calculate the resistance.", "answer": correct, "unit": "Ω"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -553,7 +553,7 @@ def gen_pi2r_find_p():
 
     return format_mcq(
         question, correct, options_data, "W",
-        scaffold=[{"question": "Calculate the power.", "answer": correct, "unit": "W"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -615,7 +615,7 @@ def gen_pi2r_find_i():
 
     return format_mcq(
         question, correct, options_data, "A",
-        scaffold=[{"question": "Calculate the current.", "answer": correct, "unit": "A"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -678,7 +678,7 @@ def gen_pi2r_find_r():
 
     return format_mcq(
         question, correct, options_data, "Ω",
-        scaffold=[{"question": "Calculate the resistance.", "answer": correct, "unit": "Ω"}],
+        scaffold=[],
         notes=NOTES["electricity_power"],
     )
 
@@ -826,7 +826,7 @@ def gen_pet_find_p():
 
     return format_mcq(
         question, correct, options_data, "W",
-        scaffold=[{"question": "Calculate the power.", "answer": correct, "unit": "W"}],
+        scaffold=[],
         notes=NOTES["electricity_power_energy"],
     )
 
@@ -888,7 +888,7 @@ def gen_pet_find_e():
 
     return format_mcq(
         question, correct, options_data, "J",
-        scaffold=[{"question": "Calculate the energy transferred.", "answer": correct, "unit": "J"}],
+        scaffold=[],
         notes=NOTES["electricity_power_energy"],
     )
 
@@ -950,7 +950,7 @@ def gen_pet_find_t():
 
     return format_mcq(
         question, correct, options_data, "s",
-        scaffold=[{"question": "Calculate the time.", "answer": correct, "unit": "s"}],
+        scaffold=[],
         notes=NOTES["electricity_power_energy"],
     )
 

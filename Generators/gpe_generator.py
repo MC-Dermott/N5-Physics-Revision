@@ -1,6 +1,7 @@
 import random
 
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -10,6 +11,20 @@ def round_sf(value, sf=3):
     """Round to significant figures."""
 
     return float(f"{value:.{sf}g}")
+
+
+def fmt_J(j):
+    """Format a J value using SI prefixes for display."""
+    j = float(j)
+    if abs(j) >= 1_000_000:
+        return f"{j / 1_000_000:g} MJ"
+    if abs(j) >= 1000:
+        return f"{j / 1000:g} kJ"
+    return f"{j:g} J"
+
+
+def g_table(gravity):
+    return f"| Constant | Value |\n|---|---|\n| g | {gravity} N/kg |"
 
 
 # =========================================================
@@ -45,7 +60,7 @@ def make_working_gpe(
         {
             "type": "latex",
             "content":
-                rf"E_p = {answer}\ \mathrm{{J}}"
+                rf"E_p = {fmt_J(answer)}"
         }
     ]
 
@@ -74,7 +89,7 @@ def make_working_mass(
         {
             "type": "latex",
             "content":
-                rf"m = \frac{{{energy}}}{{{gravity} \times {height}}}"
+                rf"m = \frac{{{fmt_J(energy)}}}{{{gravity} \times {height}}}"
         },
 
         {
@@ -109,7 +124,7 @@ def make_working_height(
         {
             "type": "latex",
             "content":
-                rf"h = \frac{{{energy}}}{{{mass} \times {gravity}}}"
+                rf"h = \frac{{{fmt_J(energy)}}}{{{mass} \times {gravity}}}"
         },
 
         {
@@ -233,7 +248,8 @@ def generate_gpe_question():
         f"What is the gravitational "
         f"potential energy of a "
         f"{mass_text} object raised "
-        f"{height}m?"
+        f"{height} m?\n\n"
+        f"{g_table(gravity)}"
     )
 
     working = make_working_gpe(
@@ -251,7 +267,7 @@ def generate_gpe_question():
 
         {
             "value": correct_val,
-
+            "display": fmt_J(correct_val),
             "summary":
                 "Correct!",
 
@@ -262,7 +278,7 @@ def generate_gpe_question():
 
         {
             "value": rearranged_answer,
-
+            "display": fmt_J(rearranged_answer),
             "summary":
                 "Incorrect.",
 
@@ -275,7 +291,7 @@ def generate_gpe_question():
 
         {
             "value": grams_error,
-
+            "display": fmt_J(grams_error),
             "summary":
                 "Incorrect.",
 
@@ -288,7 +304,7 @@ def generate_gpe_question():
 
         {
             "value": random_error,
-
+            "display": fmt_J(random_error),
             "summary":
                 "Incorrect.",
 
@@ -300,11 +316,13 @@ def generate_gpe_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_gpe"]
     )
 
 
@@ -341,8 +359,9 @@ def generate_mass_question():
 
         f"What is the mass of an object "
         f"with gravitational potential "
-        f"energy {energy}J raised "
-        f"{height}m?"
+        f"energy {fmt_J(energy)} raised "
+        f"{height} m?\n\n"
+        f"{g_table(gravity)}"
     )
 
     working = make_working_mass(
@@ -409,11 +428,13 @@ def generate_mass_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_gpe"]
     )
 
 
@@ -469,8 +490,9 @@ def generate_height_question():
         f"An object with mass "
         f"{mass_text} has "
         f"gravitational potential "
-        f"energy {energy}J. "
-        f"What height was it raised?"
+        f"energy {fmt_J(energy)}. "
+        f"What height was it raised?\n\n"
+        f"{g_table(gravity)}"
     )
 
     working = make_working_height(
@@ -537,11 +559,13 @@ def generate_height_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_gpe"]
     )
 
 
@@ -575,12 +599,8 @@ def generate_mcq_gpe():
 
     for _ in range(5):
 
-        raw_question = (
+        formatted_question = (
             generate_single_mcq_gpe()
-        )
-
-        formatted_question = format_mcq(
-            *raw_question
         )
 
         questions.append(

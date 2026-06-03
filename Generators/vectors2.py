@@ -1,6 +1,7 @@
 import random
 import math
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -114,7 +115,11 @@ def generate_magnitude_question(east, north):
         }
     ]
 
-    return question, correct_val, options_data, "km"
+    return format_mcq(
+        question, correct_val, options_data, "km",
+        scaffold=[],
+        notes=NOTES["vectors"]
+    )
 
 
 # =========================================================
@@ -182,7 +187,11 @@ def generate_bearing_question(east, north):
             "working": working
         })
 
-    return question, bearing, options_data, "°"
+    return format_mcq(
+        question, bearing, options_data, "°",
+        scaffold=[],
+        notes=NOTES["vectors"]
+    )
 
 
 # =========================================================
@@ -192,13 +201,9 @@ def generate_vector_scenario():
 
     east, north, v_dir, h_dir = generate_vector_components()
 
-    magnitude_q = format_mcq(
-        *generate_magnitude_question(east, north)
-    )
+    magnitude_q = generate_magnitude_question(east, north)
 
-    bearing_q = format_mcq(
-        *generate_bearing_question(east, north)
-    )
+    bearing_q = generate_bearing_question(east, north)
 
     return [
         magnitude_q,

@@ -1,6 +1,7 @@
 import random
 
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -159,11 +160,13 @@ def generate_acceleration_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["dynamics_newton"]
     )
 
 
@@ -242,11 +245,13 @@ def generate_mass_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["dynamics_newton"]
     )
 
 
@@ -325,11 +330,13 @@ def generate_force_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["dynamics_newton"]
     )
 
 
@@ -361,11 +368,7 @@ def generate_mcq_acc():
 
     for _ in range(5):
 
-        raw_question = generate_single_mcq_acc()
-
-        formatted_question = format_mcq(
-            *raw_question
-        )
+        formatted_question = generate_single_mcq_acc()
 
         questions.append(
             formatted_question

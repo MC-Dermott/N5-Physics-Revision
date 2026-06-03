@@ -1,6 +1,7 @@
 import random
 import math
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 C = 3e8        # speed of light, m/s
 V_SOUND = 340  # speed of sound in air, m/s
@@ -246,7 +247,9 @@ def make_find_f_em_mcq():
         },
     ]
 
-    return format_mcq(question, correct_f, options_data, "Hz")
+    return format_mcq(question, correct_f, options_data, "Hz",
+                      scaffold=[],
+                      notes=NOTES["waves_speed"])
 
 
 def make_find_lam_em_mcq():
@@ -304,7 +307,9 @@ def make_find_lam_em_mcq():
         },
     ]
 
-    return format_mcq(question, correct_lam, options_data, "m")
+    return format_mcq(question, correct_lam, options_data, "m",
+                      scaffold=[],
+                      notes=NOTES["waves_speed"])
 
 
 def make_find_v_sound_mcq():
@@ -373,7 +378,9 @@ def make_find_v_sound_mcq():
         "working": working,
     })
 
-    return format_mcq(question, correct_v, options_data, "m/s")
+    return format_mcq(question, correct_v, options_data, "m/s",
+                      scaffold=[],
+                      notes=NOTES["waves_speed"])
 
 
 def make_find_f_sound_mcq():
@@ -441,7 +448,9 @@ def make_find_f_sound_mcq():
             "working": working,
         })
 
-    return format_mcq(question, correct_f, options_data, "Hz")
+    return format_mcq(question, correct_f, options_data, "Hz",
+                      scaffold=[],
+                      notes=NOTES["waves_speed"])
 
 
 def make_find_lam_sound_mcq():
@@ -520,7 +529,9 @@ def make_find_lam_sound_mcq():
             "working": working,
         })
 
-    return format_mcq(question, correct_lam, options_data, "m")
+    return format_mcq(question, correct_lam, options_data, "m",
+                      scaffold=[],
+                      notes=NOTES["waves_speed"])
 
 
 # =========================================================

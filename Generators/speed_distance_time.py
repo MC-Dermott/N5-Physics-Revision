@@ -134,7 +134,7 @@ def gen_sdt_find_v():
 
     return format_mcq(
         question, correct, options_data, "m/s",
-        scaffold=[{"question": "Calculate the speed.", "answer": correct, "unit": "m/s"}],
+        scaffold=[],
         notes=NOTES["speed_distance_time"],
     )
 
@@ -188,7 +188,7 @@ def gen_sdt_find_d():
 
     return format_mcq(
         question, correct, options_data, "m",
-        scaffold=[{"question": "Calculate the distance.", "answer": correct, "unit": "m"}],
+        scaffold=[],
         notes=NOTES["speed_distance_time"],
     )
 
@@ -244,7 +244,7 @@ def gen_sdt_find_t():
 
     return format_mcq(
         question, correct, options_data, "s",
-        scaffold=[{"question": "Calculate the time.", "answer": correct, "unit": "s"}],
+        scaffold=[],
         notes=NOTES["speed_distance_time"],
     )
 

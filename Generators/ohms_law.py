@@ -137,7 +137,7 @@ def gen_vir_find_v():
 
     return format_mcq(
         question, correct, options_data, "V",
-        scaffold=[{"question": "Calculate the voltage.", "answer": correct, "unit": "V"}],
+        scaffold=[],
         notes=NOTES["ohms_law"],
     )
 
@@ -201,7 +201,7 @@ def gen_vir_find_i():
 
     return format_mcq(
         question, correct, options_data, "A",
-        scaffold=[{"question": "Calculate the current.", "answer": correct, "unit": "A"}],
+        scaffold=[],
         notes=NOTES["ohms_law"],
     )
 
@@ -265,7 +265,7 @@ def gen_vir_find_r():
 
     return format_mcq(
         question, correct, options_data, "Ω",
-        scaffold=[{"question": "Calculate the resistance.", "answer": correct, "unit": "Ω"}],
+        scaffold=[],
         notes=NOTES["ohms_law"],
     )
 

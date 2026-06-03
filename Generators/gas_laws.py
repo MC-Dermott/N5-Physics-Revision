@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -192,7 +193,9 @@ def generate_boyles_mcq():
                 "working": working
             }
         ],
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["gas_laws"]
     )
 
 
@@ -278,7 +281,9 @@ def generate_charles_mcq():
                 "working": working
             }
         ],
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["gas_laws"]
     )
 
 
@@ -363,7 +368,9 @@ def generate_gaylussac_mcq():
                 "working": working
             }
         ],
-        "kPa"
+        "kPa",
+        scaffold=[],
+        notes=NOTES["gas_laws"]
     )
 
 

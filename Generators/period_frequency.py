@@ -228,7 +228,7 @@ def make_find_T_mcq():
         })
 
     return format_mcq(question, T_disp, options_data, T_unit,
-                      scaffold=[{"question": "Calculate the period.", "answer": T_disp, "unit": T_unit}],
+                      scaffold=[],
                       notes=NOTES["waves_period"])
 
 
@@ -298,7 +298,7 @@ def make_find_f_mcq():
     })
 
     return format_mcq(question, f_Hz, options_data, f_unit,
-                      scaffold=[{"question": "Calculate the frequency.", "answer": f_Hz, "unit": f_unit}],
+                      scaffold=[],
                       notes=NOTES["waves_period"])
 
 
@@ -368,7 +368,7 @@ def make_find_f_from_count_mcq():
     ]
 
     return format_mcq(question, correct_f, options_data, "Hz",
-                      scaffold=[{"question": "Calculate the frequency.", "answer": correct_f, "unit": "Hz"}],
+                      scaffold=[],
                       notes=NOTES["waves_period"])
 
 
@@ -423,7 +423,7 @@ def make_find_N_mcq():
     ]
 
     return format_mcq(question, correct, options_data, "waves",
-                      scaffold=[{"question": "Calculate the number of waves.", "answer": correct, "unit": "waves"}],
+                      scaffold=[],
                       notes=NOTES["waves_period"])
 
 

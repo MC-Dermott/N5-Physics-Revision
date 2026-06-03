@@ -1,15 +1,28 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 L_VAPORISATION = 2_260_000  # J/kg
 L_FUSION = 334_000  # J/kg
 C_WATER = 4200  # J/kg°C
 
 GIVEN_DATA = (
-    "Specific latent heat of fusion of water = 334 000 J/kg\n"
-    "Specific latent heat of vaporisation of water = 2 260 000 J/kg\n"
-    "Specific heat capacity of water = 4200 J/kg °C"
+    "| Property | Value |\n"
+    "|---|---|\n"
+    "| Specific latent heat of fusion of water | 334 000 J/kg |\n"
+    "| Specific latent heat of vaporisation of water | 2 260 000 J/kg |\n"
+    "| Specific heat capacity of water | 4200 J/kg °C |"
 )
+
+
+def fmt_J(j):
+    """Format a J value using SI prefixes for display."""
+    j = float(j)
+    if abs(j) >= 1_000_000:
+        return f"{j / 1_000_000:g} MJ"
+    if abs(j) >= 1000:
+        return f"{j / 1000:g} kJ"
+    return f"{j:g} J"
 
 
 def round_sf(value, sf=3):
@@ -80,7 +93,7 @@ def latent_Q_working(mass_kg, L, Q):
     return [
         {"type": "text", "content": "Use the equation:"},
         {"type": "latex", "content": r"E_H = mL"},
-        {"type": "latex", "content": rf"E_H = {mass_kg} \times {L:,}"},
+        {"type": "latex", "content": rf"E_H = {mass_kg} \times {L:,}\ \mathrm{{J/kg}}"},
         {"type": "latex", "content": rf"E_H = {Q:,}\ \mathrm{{J}}"},
     ]
 
@@ -100,7 +113,7 @@ def shc_Q_working(mass_kg, c, T1, T2, dt, Q):
         {"type": "latex", "content": rf"\Delta T = {T2} - {T1} = {dt}\ \mathrm{{°C}}"},
         {"type": "text", "content": "Then use the equation:"},
         {"type": "latex", "content": r"E_H = mc\Delta T"},
-        {"type": "latex", "content": rf"E_H = {mass_kg} \times {c} \times {dt}"},
+        {"type": "latex", "content": rf"E_H = {mass_kg} \times {c}\ \mathrm{{J/kg\ °C}} \times {dt}"},
         {"type": "latex", "content": rf"E_H = {Q:,}\ \mathrm{{J}}"},
     ]
 
@@ -153,12 +166,14 @@ def make_latent_Q_mcq(situation_key):
         options_data = [
             {
                 "value": correct_Q,
+                "display": fmt_J(correct_Q),
                 "summary": "Correct!",
                 "mistake": None,
                 "working": working,
             },
             {
                 "value": wrong_L_Q,
+                "display": fmt_J(wrong_L_Q),
                 "summary": "Incorrect.",
                 "mistake": (
                     f"You used the {cfg['L_alt_name']} ({L_alt:,} J/kg) instead of "
@@ -169,6 +184,7 @@ def make_latent_Q_mcq(situation_key):
             },
             {
                 "value": grams_Q,
+                "display": fmt_J(grams_Q),
                 "summary": "Incorrect.",
                 "mistake": (
                     f"You substituted {display_val} into the equation without converting to kg. "
@@ -178,10 +194,11 @@ def make_latent_Q_mcq(situation_key):
             },
             {
                 "value": kj_error_Q,
+                "display": fmt_J(kj_error_Q),
                 "summary": "Incorrect.",
                 "mistake": (
-                    "You used L in kJ/kg instead of J/kg. "
-                    f"The {cfg['L_name']} is {L:,} J/kg."
+                    "You divided the latent heat by 1000 before substituting. "
+                    f"Use the value directly: L = {L:,} J/kg."
                 ),
                 "working": working,
             },
@@ -190,12 +207,14 @@ def make_latent_Q_mcq(situation_key):
         options_data = [
             {
                 "value": correct_Q,
+                "display": fmt_J(correct_Q),
                 "summary": "Correct!",
                 "mistake": None,
                 "working": working,
             },
             {
                 "value": wrong_L_Q,
+                "display": fmt_J(wrong_L_Q),
                 "summary": "Incorrect.",
                 "mistake": (
                     f"You used the {cfg['L_alt_name']} ({L_alt:,} J/kg) instead of "
@@ -206,15 +225,17 @@ def make_latent_Q_mcq(situation_key):
             },
             {
                 "value": kj_error_Q,
+                "display": fmt_J(kj_error_Q),
                 "summary": "Incorrect.",
                 "mistake": (
-                    "You used L in kJ/kg instead of J/kg. "
-                    f"The {cfg['L_name']} is {L:,} J/kg."
+                    "You divided the latent heat by 1000 before substituting. "
+                    f"Use the value directly: L = {L:,} J/kg."
                 ),
                 "working": working,
             },
             {
                 "value": both_L_Q,
+                "display": fmt_J(both_L_Q),
                 "summary": "Incorrect.",
                 "mistake": (
                     "You added both latent heat values together. "
@@ -224,7 +245,9 @@ def make_latent_Q_mcq(situation_key):
             },
         ]
 
-    return format_mcq(question, correct_Q, options_data, "J")
+    return format_mcq(question, correct_Q, options_data, "J",
+                      scaffold=[],
+                      notes=NOTES["heat_shc"])
 
 
 # =========================================================
@@ -253,7 +276,7 @@ def make_latent_m_mcq(situation_key):
 
     question = (
         f"{desc}\n\n"
-        f"Energy transferred = {Q:,} J\n"
+        f"Energy transferred = {fmt_J(Q)}\n"
         f"{GIVEN_DATA}\n\n"
         f"Calculate the mass."
     )
@@ -296,7 +319,9 @@ def make_latent_m_mcq(situation_key):
         },
     ]
 
-    return format_mcq(question, correct_m, options_data, "kg")
+    return format_mcq(question, correct_m, options_data, "kg",
+                      scaffold=[],
+                      notes=NOTES["heat_shc"])
 
 
 # =========================================================
@@ -323,15 +348,20 @@ def make_shc_Q_mcq():
 
     working = shc_Q_working(mass_kg, C_WATER, T1, T2, dt, correct_Q)
 
+    v_T2 = shc_q(mass_g, T2)
+    v_T1 = shc_q(mass_g, T1)
+
     options_data = [
         {
             "value": correct_Q,
+            "display": fmt_J(correct_Q),
             "summary": "Correct!",
             "mistake": None,
             "working": working,
         },
         {
-            "value": shc_q(mass_g, T2),
+            "value": v_T2,
+            "display": fmt_J(v_T2),
             "summary": "Incorrect.",
             "mistake": (
                 f"You used T₂ = {T2} °C directly instead of the temperature change. "
@@ -340,7 +370,8 @@ def make_shc_Q_mcq():
             "working": working,
         },
         {
-            "value": shc_q(mass_g, T1),
+            "value": v_T1,
+            "display": fmt_J(v_T1),
             "summary": "Incorrect.",
             "mistake": (
                 f"You used T₁ = {T1} °C directly instead of the temperature change. "
@@ -351,8 +382,10 @@ def make_shc_Q_mcq():
     ]
 
     if is_grams:
+        v_g = shc_q(mass_g * 1000, dt)
         options_data.append({
-            "value": shc_q(mass_g * 1000, dt),
+            "value": v_g,
+            "display": fmt_J(v_g),
             "summary": "Incorrect.",
             "mistake": (
                 f"You substituted {display_val} into the equation without converting to kg. "
@@ -361,8 +394,10 @@ def make_shc_Q_mcq():
             "working": working,
         })
     else:
+        v_sum = shc_q(mass_g, T1 + T2)
         options_data.append({
-            "value": shc_q(mass_g, T1 + T2),
+            "value": v_sum,
+            "display": fmt_J(v_sum),
             "summary": "Incorrect.",
             "mistake": (
                 f"You added T₁ and T₂ instead of subtracting. "
@@ -371,7 +406,12 @@ def make_shc_Q_mcq():
             "working": working,
         })
 
-    return format_mcq(question, correct_Q, options_data, "J")
+    return format_mcq(question, correct_Q, options_data, "J",
+                      scaffold=[
+                          {"question": "Calculate the temperature change ΔT.", "answer": float(dt), "unit": "°C"},
+                          {"question": "Calculate the energy transferred.", "answer": float(correct_Q), "unit": "J"},
+                      ],
+                      notes=NOTES["heat_shc"])
 
 
 # =========================================================
@@ -391,7 +431,7 @@ def make_shc_m_mcq():
 
     question = (
         f"Water is heated through a temperature change of {dt} °C.\n\n"
-        f"Energy transferred = {Q:,} J\n"
+        f"Energy transferred = {fmt_J(Q)}\n"
         f"{GIVEN_DATA}\n\n"
         f"Calculate the mass of water."
     )
@@ -434,7 +474,9 @@ def make_shc_m_mcq():
         },
     ]
 
-    return format_mcq(question, correct_m, options_data, "kg")
+    return format_mcq(question, correct_m, options_data, "kg",
+                      scaffold=[],
+                      notes=NOTES["heat_shc"])
 
 
 # =========================================================
@@ -454,7 +496,7 @@ def make_shc_dt_mcq():
 
     question = (
         f"Water of mass {mass_text} is heated.\n\n"
-        f"Energy transferred = {Q:,} J\n"
+        f"Energy transferred = {fmt_J(Q)}\n"
         f"{GIVEN_DATA}\n\n"
         f"Calculate the temperature change."
     )
@@ -509,7 +551,9 @@ def make_shc_dt_mcq():
             "working": working,
         })
 
-    return format_mcq(question, correct_dt, options_data, "°C")
+    return format_mcq(question, correct_dt, options_data, "°C",
+                      scaffold=[],
+                      notes=NOTES["heat_shc"])
 
 
 # =========================================================

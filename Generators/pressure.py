@@ -1,7 +1,40 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 g = 9.8
+
+G_TABLE = "| Constant | Value |\n|---|---|\n| g | 9.8 N/kg |"
+
+
+def fmt_N(val):
+    """Format a Newton value using SI prefixes."""
+    val = float(val)
+    if abs(val) >= 1000:
+        return f"{val / 1000:g} kN"
+    return f"{val:g} N"
+
+
+def fmt_Pa(val):
+    """Format a Pascal value using SI prefixes."""
+    val = float(val)
+    if abs(val) >= 1000:
+        return f"{val / 1000:g} kPa"
+    return f"{val:g} Pa"
+
+
+def fmt_N_latex(val):
+    val = float(val)
+    if abs(val) >= 1000:
+        return rf"{val / 1000:g}\ \mathrm{{kN}}"
+    return rf"{val:g}\ \mathrm{{N}}"
+
+
+def fmt_Pa_latex(val):
+    val = float(val)
+    if abs(val) >= 1000:
+        return rf"{val / 1000:g}\ \mathrm{{kPa}}"
+    return rf"{val:g}\ \mathrm{{Pa}}"
 
 CONTEXTS = {
     "bike": {
@@ -35,7 +68,7 @@ def weight_working(mass, weight):
         {"type": "text", "content": "Use the equation for weight:"},
         {"type": "latex", "content": r"W = mg"},
         {"type": "latex", "content": rf"W = {mass} \times 9.8"},
-        {"type": "latex", "content": rf"W = {weight}\ \mathrm{{N}}"},
+        {"type": "latex", "content": rf"W = {fmt_N_latex(weight)}"},
     ]
 
 
@@ -47,8 +80,8 @@ def pressure_working(weight, num_wheels, area_per_tyre, total_area, pressure):
         {"type": "latex", "content": rf"A_{{total}} = {total_area}\ \mathrm{{m^2}}"},
         {"type": "text", "content": "Now apply the pressure equation:"},
         {"type": "latex", "content": r"P = \frac{F}{A}"},
-        {"type": "latex", "content": rf"P = \frac{{{weight}}}{{{total_area}}}"},
-        {"type": "latex", "content": rf"P = {pressure}\ \mathrm{{Pa}}"},
+        {"type": "latex", "content": rf"P = \frac{{{fmt_N_latex(weight)}}}{{{total_area}}}"},
+        {"type": "latex", "content": rf"P = {fmt_Pa_latex(pressure)}"},
     ]
 
 
@@ -57,7 +90,7 @@ def area_working(weight, pressure, total_area):
     return [
         {"type": "text", "content": "Rearrange P = F/A to make A the subject:"},
         {"type": "latex", "content": r"A = \frac{F}{P}"},
-        {"type": "latex", "content": rf"A = \frac{{{weight}}}{{{pressure}}}"},
+        {"type": "latex", "content": rf"A = \frac{{{fmt_N_latex(weight)}}}{{{fmt_Pa_latex(pressure)}}}"},
         {"type": "latex", "content": rf"A = {total_area}\ \mathrm{{m^2}}"},
     ]
 
@@ -67,7 +100,7 @@ def area_per_tyre_working(weight, pressure, total_area, num_wheels, area_per_tyr
     return [
         {"type": "text", "content": "First find the total contact area using P = F/A:"},
         {"type": "latex", "content": r"A_{total} = \frac{F}{P}"},
-        {"type": "latex", "content": rf"A_{{total}} = \frac{{{weight}}}{{{pressure}}}"},
+        {"type": "latex", "content": rf"A_{{total}} = \frac{{{fmt_N_latex(weight)}}}{{{fmt_Pa_latex(pressure)}}}"},
         {"type": "latex", "content": rf"A_{{total}} = {total_area}\ \mathrm{{m^2}}"},
         {"type": "text", "content": f"Now divide by the number of tyres ({num_wheels}):"},
         {"type": "latex", "content": rf"A_{{tyre}} = \frac{{{total_area}}}{{{num_wheels}}}"},
@@ -80,8 +113,8 @@ def force_working(pressure, total_area, force):
     return [
         {"type": "text", "content": "Rearrange P = F/A to make F the subject:"},
         {"type": "latex", "content": r"F = P \times A"},
-        {"type": "latex", "content": rf"F = {pressure} \times {total_area}"},
-        {"type": "latex", "content": rf"F = {force}\ \mathrm{{N}}"},
+        {"type": "latex", "content": rf"F = {fmt_Pa_latex(pressure)} \times {total_area}"},
+        {"type": "latex", "content": rf"F = {fmt_N_latex(force)}"},
     ]
 
 
@@ -93,27 +126,34 @@ def make_weight_mcq(label, mass, weight):
 
     working = weight_working(mass, weight)
 
+    w_div = round(mass / 9.8, 1)
+    w_ten = float(mass * 10)
+
     options_data = [
         {
             "value": weight,
+            "display": fmt_N(weight),
             "summary": "Correct!",
             "mistake": None,
             "working": working
         },
         {
-            "value": round(mass / 9.8, 1),
+            "value": w_div,
+            "display": fmt_N(w_div),
             "summary": "Incorrect.",
             "mistake": "You divided by g instead of multiplying. W = m × g.",
             "working": working
         },
         {
-            "value": float(mass * 10),
+            "value": w_ten,
+            "display": fmt_N(w_ten),
             "summary": "Incorrect.",
             "mistake": "You used g = 10 N/kg. The correct value is g = 9.8 N/kg.",
             "working": working
         },
         {
             "value": float(mass),
+            "display": fmt_N(float(mass)),
             "summary": "Incorrect.",
             "mistake": "You gave the mass in kg, not the weight in N. Weight = mass × g.",
             "working": working
@@ -122,26 +162,34 @@ def make_weight_mcq(label, mass, weight):
 
     question = (
         f"A {label} has a total mass of {mass} kg.\n\n"
-        f"g = 9.8 N/kg\n\n"
+        f"{G_TABLE}\n\n"
         f"Calculate the weight of the {label}."
     )
 
-    return format_mcq(question, weight, options_data, "N")
+    return format_mcq(question, weight, options_data, "N",
+                      scaffold=[],
+                      notes=NOTES["pressure"])
 
 
 def make_pressure_mcq(label, num_wheels, weight, area_per_tyre, total_area, pressure):
 
     working = pressure_working(weight, num_wheels, area_per_tyre, total_area, pressure)
 
+    p_one_tyre = round(weight / area_per_tyre)
+    p_div_wheels = round(pressure / num_wheels)
+    p_wrong_area = round(weight / (total_area + area_per_tyre))
+
     options_data = [
         {
             "value": pressure,
+            "display": fmt_Pa(pressure),
             "summary": "Correct!",
             "mistake": None,
             "working": working
         },
         {
-            "value": round(weight / area_per_tyre),
+            "value": p_one_tyre,
+            "display": fmt_Pa(p_one_tyre),
             "summary": "Incorrect.",
             "mistake": (
                 f"You used the area of one tyre, not the total. "
@@ -150,13 +198,15 @@ def make_pressure_mcq(label, num_wheels, weight, area_per_tyre, total_area, pres
             "working": working
         },
         {
-            "value": round(pressure / num_wheels),
+            "value": p_div_wheels,
+            "display": fmt_Pa(p_div_wheels),
             "summary": "Incorrect.",
             "mistake": f"You divided by the number of wheels ({num_wheels}) as well as the total area. P = F ÷ A_total only.",
             "working": working
         },
         {
-            "value": round(weight / (total_area + area_per_tyre)),
+            "value": p_wrong_area,
+            "display": fmt_Pa(p_wrong_area),
             "summary": "Incorrect.",
             "mistake": f"Check your total contact area. The {label} has {num_wheels} tyres, each {area_per_tyre} m².",
             "working": working
@@ -168,7 +218,9 @@ def make_pressure_mcq(label, num_wheels, weight, area_per_tyre, total_area, pres
         f"Using your answer to part 1, calculate the pressure exerted by the {label} on the ground."
     )
 
-    return format_mcq(question, pressure, options_data, "Pa")
+    return format_mcq(question, pressure, options_data, "Pa",
+                      scaffold=[],
+                      notes=NOTES["pressure"])
 
 
 def make_total_area_mcq(label, num_wheels, weight, pressure, total_area, area_per_tyre):
@@ -206,11 +258,13 @@ def make_total_area_mcq(label, num_wheels, weight, pressure, total_area, area_pe
     ]
 
     question = (
-        f"The {label} exerts a pressure of {pressure} Pa on the ground.\n\n"
+        f"The {label} exerts a pressure of {fmt_Pa(pressure)} on the ground.\n\n"
         f"Using your answer to part 1, calculate the total contact area of the {label}'s tyres on the ground."
     )
 
-    return format_mcq(question, total_area, options_data, "m²")
+    return format_mcq(question, total_area, options_data, "m²",
+                      scaffold=[],
+                      notes=NOTES["pressure"])
 
 
 def make_per_tyre_area_mcq(label, num_wheels, weight, pressure, total_area, area_per_tyre):
@@ -245,39 +299,49 @@ def make_per_tyre_area_mcq(label, num_wheels, weight, pressure, total_area, area
     ]
 
     question = (
-        f"The {label} exerts a pressure of {pressure} Pa on the ground. "
+        f"The {label} exerts a pressure of {fmt_Pa(pressure)} on the ground. "
         f"It has {num_wheels} tyres.\n\n"
         f"Using your answer to part 1, calculate the contact area of each individual tyre."
     )
 
-    return format_mcq(question, area_per_tyre, options_data, "m²")
+    return format_mcq(question, area_per_tyre, options_data, "m²",
+                      scaffold=[],
+                      notes=NOTES["pressure"])
 
 
 def make_force_mcq(label, num_wheels, pressure, total_area, force):
 
     working = force_working(pressure, total_area, force)
 
+    f_one_tyre = round(pressure * (total_area / num_wheels), 1)
+    f_times_wheels = round(force * num_wheels, 1)
+    f_mass = round(force / g)
+
     options_data = [
         {
             "value": force,
+            "display": fmt_N(force),
             "summary": "Correct!",
             "mistake": None,
             "working": working
         },
         {
-            "value": round(pressure * (total_area / num_wheels), 1),
+            "value": f_one_tyre,
+            "display": fmt_N(f_one_tyre),
             "summary": "Incorrect.",
             "mistake": f"You used the area of one tyre. The total contact area is {total_area} m² ({num_wheels} tyres combined).",
             "working": working
         },
         {
-            "value": round(force * num_wheels, 1),
+            "value": f_times_wheels,
+            "display": fmt_N(f_times_wheels),
             "summary": "Incorrect.",
             "mistake": f"You multiplied by {num_wheels} (the number of wheels). F = P × A_total — the total area already accounts for all tyres.",
             "working": working
         },
         {
-            "value": round(force / g),
+            "value": float(f_mass),
+            "display": f"{f_mass} kg",
             "summary": "Incorrect.",
             "mistake": "This is the mass in kg, not the weight in N. The weight is the force the object exerts due to gravity.",
             "working": working
@@ -285,12 +349,14 @@ def make_force_mcq(label, num_wheels, pressure, total_area, force):
     ]
 
     question = (
-        f"A {label} exerts a pressure of {pressure} Pa on the ground.\n\n"
+        f"A {label} exerts a pressure of {fmt_Pa(pressure)} on the ground.\n\n"
         f"The total contact area of its {num_wheels} tyres is {total_area} m².\n\n"
         f"Calculate the weight of the {label}."
     )
 
-    return format_mcq(question, force, options_data, "N")
+    return format_mcq(question, force, options_data, "N",
+                      scaffold=[],
+                      notes=NOTES["pressure"])
 
 
 # =========================================================

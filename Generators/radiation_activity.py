@@ -99,7 +99,7 @@ def gen_act_find_a():
 
     return format_mcq(
         question, correct, options_data, "Bq",
-        scaffold=[{"question": "Calculate the activity.", "answer": correct, "unit": "Bq"}],
+        scaffold=[],
         notes=NOTES["radiation_activity"],
     )
 
@@ -153,7 +153,7 @@ def gen_act_find_n():
 
     return format_mcq(
         question, correct, options_data, "decays",
-        scaffold=[{"question": "Calculate the number of decays.", "answer": correct, "unit": "decays"}],
+        scaffold=[],
         notes=NOTES["radiation_activity"],
     )
 
@@ -196,7 +196,7 @@ def gen_act_find_t():
 
     return format_mcq(
         question, correct, options_data, "s",
-        scaffold=[{"question": "Calculate the time.", "answer": correct, "unit": "s"}],
+        scaffold=[],
         notes=NOTES["radiation_activity"],
     )
 

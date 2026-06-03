@@ -1,6 +1,7 @@
 import random
 
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 
 # =========================================================
@@ -10,6 +11,16 @@ def round_sf(value, sf=3):
     """Round to significant figures."""
 
     return float(f"{value:.{sf}g}")
+
+
+def fmt_J(j):
+    """Format a J value using SI prefixes for display."""
+    j = float(j)
+    if abs(j) >= 1_000_000:
+        return f"{j / 1_000_000:g} MJ"
+    if abs(j) >= 1000:
+        return f"{j / 1000:g} kJ"
+    return f"{j:g} J"
 
 
 # =========================================================
@@ -44,7 +55,7 @@ def make_working_ke(
         {
             "type": "latex",
             "content":
-                rf"E_k = {answer}\ \mathrm{{J}}"
+                rf"E_k = {fmt_J(answer)}"
         }
     ]
 
@@ -72,7 +83,7 @@ def make_working_mass(
         {
             "type": "latex",
             "content":
-                rf"m = \frac{{2 \times {energy}}}{{{velocity}^2}}"
+                rf"m = \frac{{2 \times {fmt_J(energy)}}}{{{velocity}^2}}"
         },
 
         {
@@ -106,7 +117,7 @@ def make_working_velocity(
         {
             "type": "latex",
             "content":
-                rf"v = \sqrt{{\frac{{2 \times {energy}}}{{{mass}}}}}"
+                rf"v = \sqrt{{\frac{{2 \times {fmt_J(energy)}}}{{{mass}}}}}"
         },
 
         {
@@ -235,7 +246,7 @@ def generate_ke_question():
 
         {
             "value": correct_val,
-
+            "display": fmt_J(correct_val),
             "summary":
                 "Correct!",
 
@@ -246,7 +257,7 @@ def generate_ke_question():
 
         {
             "value": rearranged_answer,
-
+            "display": fmt_J(rearranged_answer),
             "summary":
                 "Incorrect.",
 
@@ -259,7 +270,7 @@ def generate_ke_question():
 
         {
             "value": grams_error,
-
+            "display": fmt_J(grams_error),
             "summary":
                 "Incorrect.",
 
@@ -272,7 +283,7 @@ def generate_ke_question():
 
         {
             "value": random_error,
-
+            "display": fmt_J(random_error),
             "summary":
                 "Incorrect.",
 
@@ -284,11 +295,13 @@ def generate_ke_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_ke"]
     )
 
 
@@ -323,8 +336,8 @@ def generate_mass_question():
 
         f"What is the mass of an "
         f"object with kinetic energy "
-        f"{energy}J moving at "
-        f"{velocity}m/s?"
+        f"{fmt_J(energy)} moving at "
+        f"{velocity} m/s?"
     )
 
     working = make_working_mass(
@@ -389,11 +402,13 @@ def generate_mass_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_ke"]
     )
 
 
@@ -446,7 +461,7 @@ def generate_velocity_question():
 
         f"An object with mass "
         f"{mass_text} has kinetic "
-        f"energy {energy}J. "
+        f"energy {fmt_J(energy)}. "
         f"What is its velocity?"
     )
 
@@ -512,11 +527,13 @@ def generate_velocity_question():
         }
     ]
 
-    return (
+    return format_mcq(
         question,
         correct_val,
         options_data,
-        unit
+        unit,
+        scaffold=[],
+        notes=NOTES["energy_ke"]
     )
 
 
@@ -550,12 +567,8 @@ def generate_mcq_ke():
 
     for _ in range(5):
 
-        raw_question = (
+        formatted_question = (
             generate_single_mcq_ke()
-        )
-
-        formatted_question = format_mcq(
-            *raw_question
         )
 
         questions.append(

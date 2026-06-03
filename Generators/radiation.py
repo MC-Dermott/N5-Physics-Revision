@@ -1,5 +1,6 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 # Radiation weighting factors for N5 Physics
 RADIATION_TYPES = [
@@ -169,7 +170,9 @@ def _make_D_mcq(question, E, mass_display, mass_unit, mass_kg, is_grams, mass_g,
          "summary": "Incorrect.", "mistake": content_mistake, "working": working},
     ]
 
-    return format_mcq(question, D, options_data, "Gy")
+    return format_mcq(question, D, options_data, "Gy",
+                      scaffold=[],
+                      notes=NOTES["radiation_doses"])
 
 
 def _make_H_mcq(question, D, w_R, H):
@@ -205,7 +208,9 @@ def _make_H_mcq(question, D, w_R, H):
          "summary": "Incorrect.", "mistake": content_mistake, "working": working},
     ]
 
-    return format_mcq(question, H, options_data, "Sv")
+    return format_mcq(question, H, options_data, "Sv",
+                      scaffold=[],
+                      notes=NOTES["radiation_doses"])
 
 
 def _make_Hdot_mcq(question, H, t_h, dose_rate):
@@ -235,7 +240,9 @@ def _make_Hdot_mcq(question, H, t_h, dose_rate):
          "working": working},
     ]
 
-    return format_mcq(question, dose_rate, options_data, "Sv/h")
+    return format_mcq(question, dose_rate, options_data, "Sv/h",
+                      scaffold=[],
+                      notes=NOTES["radiation_doses"])
 
 
 def _make_H_from_rate_mcq(question, dose_rate, t_h, H, D):
@@ -267,7 +274,9 @@ def _make_H_from_rate_mcq(question, dose_rate, t_h, H, D):
          "working": working},
     ]
 
-    return format_mcq(question, H, options_data, "Sv")
+    return format_mcq(question, H, options_data, "Sv",
+                      scaffold=[],
+                      notes=NOTES["radiation_doses"])
 
 
 def _make_D_from_H_mcq(question, H, w_R, D):
@@ -301,7 +310,9 @@ def _make_D_from_H_mcq(question, H, w_R, D):
          "working": working},
     ]
 
-    return format_mcq(question, D, options_data, "Gy")
+    return format_mcq(question, D, options_data, "Gy",
+                      scaffold=[],
+                      notes=NOTES["radiation_doses"])
 
 
 def _make_E_mcq(question, D, mass_display, mass_unit, mass_kg, is_grams, mass_g, E):
@@ -340,7 +351,9 @@ def _make_E_mcq(question, D, mass_display, mass_unit, mass_kg, is_grams, mass_g,
          "summary": "Incorrect.", "mistake": content_mistake, "working": working},
     ]
 
-    return format_mcq(question, E, options_data, "J")
+    return format_mcq(question, E, options_data, "J",
+                      scaffold=[],
+                      notes=NOTES["radiation_doses"])
 
 
 # =========================================================
