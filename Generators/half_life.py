@@ -1,5 +1,22 @@
 import random
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
+
+
+def fmt_Bq(bq):
+    """Format a Bq value using SI prefixes for display."""
+    bq = float(bq)
+    if abs(bq) >= 1000:
+        return f"{bq / 1000:g} kBq"
+    return f"{bq:g} Bq"
+
+
+def fmt_Bq_latex(bq):
+    """Return a LaTeX string for a Bq value with SI prefix."""
+    bq = float(bq)
+    if abs(bq) >= 1000:
+        return rf"{bq / 1000:g}\ \mathrm{{kBq}}"
+    return rf"{bq:g}\ \mathrm{{Bq}}"
 
 HALF_LIFE_OPTIONS = [
     (2,  "s"),   (5,  "s"),   (10, "s"),   (30, "s"),
@@ -46,38 +63,36 @@ def _pick_distractors(candidates_with_mistakes, correct_val):
 # =========================================================
 
 def _forward_working(A0, n, T_half, t_total, t_unit):
-    # Build arrow chain: A0 → A0/2 → A0/4 → …
     values = [A0]
     current = A0
     for _ in range(n):
         current = current // 2
         values.append(current)
-    arrow_chain = r" \rightarrow ".join(str(v) for v in values)
+    arrow_chain = r" \rightarrow ".join(fmt_Bq_latex(v) for v in values)
 
     return [
         {"type": "text", "content": "Find the number of half-lives that have passed:"},
         {"type": "latex",
          "content": rf"n = \frac{{t}}{{T_{{1/2}}}} = \frac{{{t_total}}}{{{T_half}}} = {n}"},
         {"type": "text", "content": "Halve the activity once for each half-life:"},
-        {"type": "latex", "content": rf"{arrow_chain}\ \mathrm{{Bq}}"},
+        {"type": "latex", "content": arrow_chain},
     ]
 
 
 def _backward_working(A_now, n, T_half, t_total, t_unit):
-    # Build arrow chain going backwards: A_now → 2A → 4A → …
     values = [A_now]
     current = A_now
     for _ in range(n):
         current = current * 2
         values.append(current)
-    arrow_chain = r" \rightarrow ".join(str(v) for v in values)
+    arrow_chain = r" \rightarrow ".join(fmt_Bq_latex(v) for v in values)
 
     return [
         {"type": "text", "content": "Find the number of half-lives to go back:"},
         {"type": "latex",
          "content": rf"n = \frac{{t}}{{T_{{1/2}}}} = \frac{{{t_total}}}{{{T_half}}} = {n}"},
         {"type": "text", "content": "Double the activity once for each half-life going backwards:"},
-        {"type": "latex", "content": rf"{arrow_chain}\ \mathrm{{Bq}}"},
+        {"type": "latex", "content": arrow_chain},
     ]
 
 
@@ -89,7 +104,7 @@ def _half_life_working(A0, A_final, n, t_total, T_half):
     for _ in range(n):
         nxt = current // 2
         steps.append({"type": "latex",
-                       "content": rf"{current}\ \div\ 2 = {nxt}\ \mathrm{{Bq}}"})
+                       "content": rf"{fmt_Bq_latex(current)}\ \div\ 2 = {fmt_Bq_latex(nxt)}"})
         current = nxt
     steps += [
         {"type": "latex", "content": rf"\therefore\ n = {n}\ \text{{half-lives}}"},
@@ -134,17 +149,23 @@ def generate_forward_activity():
     distractors = _pick_distractors(candidates, A_final)
 
     question = (
-        f"A radioactive source has an initial activity of {A0} Bq. "
+        f"A radioactive source has an initial activity of {fmt_Bq(A0)}. "
         f"The half-life of the source is {_time_str(T_half, t_unit)}.\n\n"
         f"Calculate the activity after {_time_str(t_total, t_unit)}."
     )
 
-    options_data = [{"value": A_final, "summary": "Correct!", "mistake": None, "working": working}]
+    options_data = [{"value": A_final, "display": fmt_Bq(A_final),
+                     "summary": "Correct!", "mistake": None, "working": working}]
     for val, mistake in distractors:
-        options_data.append({"value": val, "summary": "Incorrect.",
-                              "mistake": mistake, "working": working})
+        options_data.append({"value": val, "display": fmt_Bq(val),
+                              "summary": "Incorrect.", "mistake": mistake, "working": working})
 
-    return format_mcq(question, A_final, options_data, "Bq")
+    return format_mcq(question, A_final, options_data, "Bq",
+                      scaffold=[
+                          {"question": "Calculate the number of half-lives n.", "answer": float(n), "unit": "half-lives"},
+                          {"question": "Calculate the final activity.", "answer": float(A_final), "unit": "Bq"},
+                      ],
+                      notes=NOTES["radiation_half_life"])
 
 
 # =========================================================
@@ -171,7 +192,7 @@ def generate_backward_activity():
          "Going backwards in time the activity was larger, not smaller. "
          "Multiply by 2 for each half-life."),
         (A_now * 2,
-         f"{n} half-life{'s' if n>1 else ''} ago the activity was {A0} Bq. "
+         f"{n} half-life{'s' if n>1 else ''} ago the activity was {fmt_Bq(A0)}. "
          f"Double {n} time{'s' if n>1 else ''} to reverse {n} half-life{'s' if n>1 else ''}."),
         (A_now,
          "The activity must have been higher in the past. Multiply by 2 for each half-life."),
@@ -183,17 +204,23 @@ def generate_backward_activity():
     distractors = _pick_distractors(candidates, A0)
 
     question = (
-        f"A radioactive source currently has an activity of {A_now} Bq. "
+        f"A radioactive source currently has an activity of {fmt_Bq(A_now)}. "
         f"The half-life of the source is {_time_str(T_half, t_unit)}.\n\n"
         f"Calculate the activity of the source {_time_str(t_total, t_unit)} ago."
     )
 
-    options_data = [{"value": A0, "summary": "Correct!", "mistake": None, "working": working}]
+    options_data = [{"value": A0, "display": fmt_Bq(A0),
+                     "summary": "Correct!", "mistake": None, "working": working}]
     for val, mistake in distractors:
-        options_data.append({"value": val, "summary": "Incorrect.",
-                              "mistake": mistake, "working": working})
+        options_data.append({"value": val, "display": fmt_Bq(val),
+                              "summary": "Incorrect.", "mistake": mistake, "working": working})
 
-    return format_mcq(question, A0, options_data, "Bq")
+    return format_mcq(question, A0, options_data, "Bq",
+                      scaffold=[
+                          {"question": "Calculate the number of half-lives n.", "answer": float(n), "unit": "half-lives"},
+                          {"question": "Calculate the original activity.", "answer": float(A0), "unit": "Bq"},
+                      ],
+                      notes=NOTES["radiation_half_life"])
 
 
 # =========================================================
@@ -231,8 +258,8 @@ def generate_half_life():
     distractors = _pick_distractors(candidates, T_half)
 
     question = (
-        f"A radioactive source has an initial activity of {A0} Bq. "
-        f"After {_time_str(t_total, t_unit)}, the activity has fallen to {A_final} Bq.\n\n"
+        f"A radioactive source has an initial activity of {fmt_Bq(A0)}. "
+        f"After {_time_str(t_total, t_unit)}, the activity has fallen to {fmt_Bq(A_final)}.\n\n"
         f"Calculate the half-life of the source."
     )
 
@@ -241,7 +268,12 @@ def generate_half_life():
         options_data.append({"value": val, "summary": "Incorrect.",
                               "mistake": mistake, "working": working})
 
-    return format_mcq(question, T_half, options_data, t_unit)
+    return format_mcq(question, T_half, options_data, t_unit,
+                      scaffold=[
+                          {"question": "Calculate the number of half-lives n.", "answer": float(n), "unit": "half-lives"},
+                          {"question": "Calculate the half-life.", "answer": float(T_half), "unit": t_unit},
+                      ],
+                      notes=NOTES["radiation_half_life"])
 
 
 # =========================================================

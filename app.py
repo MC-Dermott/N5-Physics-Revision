@@ -1,29 +1,32 @@
+import random
 import streamlit as st
 
-from Generators.acceleration import generate_mcq_acc
-from Generators.speed_distance_time import generate_sdt_mcqs
-from Generators.current import generate_mcq_current
-from Generators.ohms_law import generate_ohms_law_mcqs
-from Generators.resistor_combinations import generate_resistor_combination_mcqs
-from Generators.forces import generate_mcq_forces
-from Generators.projectiles import generate_projectile_mcqs
-from Generators.vectors2 import generate_mcq_vectors
-from Generators.gas_laws import generate_gas_law_mcqs
-from Generators.weight import generate_mcq_wmg
-from Generators.energy import generate_energy_quiz
-from Generators.radiation_activity import generate_activity_mcqs
-from Generators.potential_divider_generator import generate_potential_divider_mcq
+from Generators.acceleration import generate_mcq_acc, generate_single_mcq_acc
+from Generators.speed_distance_time import generate_sdt_mcqs, generate_single_mcq_sdt
+from Generators.current import generate_mcq_current, generate_single_mcq_current
+from Generators.ohms_law import generate_ohms_law_mcqs, generate_single_mcq_vir
+from Generators.resistor_combinations import generate_resistor_combination_mcqs, generate_single_mcq_resistors
+from Generators.forces import generate_mcq_forces, generate_single_mcq_forces
+from Generators.projectiles import generate_projectile_mcqs, generate_projectile_mcq_set
+from Generators.vectors2 import generate_mcq_vectors, generate_vector_scenario
+from Generators.gas_laws import generate_gas_law_mcqs, generate_boyles_mcq, generate_charles_mcq, generate_gaylussac_mcq
+from Generators.weight import generate_mcq_wmg, generate_single_mcq_wmg
+from Generators.energy import generate_energy_quiz, generate_single_energy_question
+from Generators.radiation_activity import generate_activity_mcqs, generate_single_mcq_activity
+from Generators.potential_divider_generator import generate_potential_divider_mcq, generate_single_potential_divider_mcq
 from Generators.transistor_generator import generate_fixed_5v_potential_divider_quiz
+from Generators.transistor_generator import generate_single_mcq as generate_single_mcq_transistor
 from Generators.complex_circuit_generator import generate_parallel_series_quiz
-from Generators.mixed_voltage import generate_circuit_quiz
+from Generators.complex_circuit_generator import generate_single_mcq as generate_single_mcq_complex
+from Generators.mixed_voltage import generate_circuit_quiz, generate_single_circuit_question
 from Generators.pressure import generate_pressure_mcqs
 from Generators.specific_heat_generator import generate_specific_heat_mcqs
-from Generators.radiation import generate_radiation_scenarios
-from Generators.half_life import generate_half_life_mcqs
+from Generators.radiation import generate_radiation_scenarios, generate_forward_scenario, generate_reverse_scenario
+from Generators.half_life import generate_half_life_mcqs, generate_forward_activity, generate_backward_activity, generate_half_life
 from Generators.wave_speed import generate_wave_speed_mcqs
 from Generators.period_frequency import generate_period_frequency_mcqs
 from Generators.waves_combined import generate_waves_combined_mcqs
-from Generators.electrical_power import generate_mcq_power, generate_mcq_pet
+from Generators.electrical_power import generate_mcq_power, generate_mcq_pet, generate_single_mcq_power, generate_single_mcq_pet
 
 
 # =========================================================
@@ -78,6 +81,60 @@ question_generators = {
     for topics in units.values()
     for topic, generator in topics.items()
 }
+
+
+# =========================================================
+# TOPIC TEST GENERATORS
+# One callable per generator; each returns a single question
+# item (dict for a regular question, list for a scenario).
+# =========================================================
+
+TOPIC_TEST_GENERATORS = {
+    "Dynamics": [
+        generate_single_mcq_sdt,
+        generate_single_mcq_acc,
+        generate_single_mcq_forces,
+        generate_projectile_mcq_set,        # scenario (list)
+        generate_vector_scenario,           # scenario (list)
+        generate_single_mcq_wmg,
+        generate_single_energy_question,
+    ],
+    "Electricity": [
+        generate_single_mcq_current,
+        generate_single_mcq_vir,
+        generate_single_mcq_resistors,
+        generate_single_mcq_power,
+        generate_single_mcq_pet,
+        generate_single_potential_divider_mcq,
+        generate_single_mcq_transistor,
+        generate_single_mcq_complex,
+        generate_single_circuit_question,
+    ],
+    "Radiation": [
+        lambda: random.choice([generate_forward_scenario, generate_reverse_scenario])(),
+        lambda: random.choice([generate_forward_activity, generate_backward_activity, generate_half_life])(),
+        generate_single_mcq_activity,
+    ],
+    "Waves": [
+        lambda: generate_wave_speed_mcqs(num=1)[0],
+        lambda: generate_period_frequency_mcqs(num=1)[0],
+        lambda: generate_waves_combined_mcqs(num=1)[0],
+    ],
+    "Properties of Matter": [
+        lambda: random.choice([generate_boyles_mcq, generate_charles_mcq, generate_gaylussac_mcq])(),
+        lambda: generate_pressure_mcqs(num=1)[0],
+        lambda: generate_specific_heat_mcqs(num=1)[0],
+    ],
+}
+
+
+def generate_topic_test(unit_name, num_questions=10):
+    gens = TOPIC_TEST_GENERATORS[unit_name]
+    questions = [g() for g in gens]
+    while len(questions) < num_questions:
+        questions.append(random.choice(gens)())
+    random.shuffle(questions)
+    return questions
 
 
 # =========================================================
@@ -211,12 +268,31 @@ def render_feedback(q, selected_letter, correct):
 
 st.title("Physics Revision Tool")
 
-unit_choice = st.selectbox("Choose a unit:", list(units.keys()))
-topic_choice = st.selectbox("Choose a topic:", list(units[unit_choice].keys()))
+mode = st.radio("Mode:", ["Topic Quiz", "Topic Test (10 questions)"], horizontal=True)
 
-if st.button("Generate New Quiz"):
-    st.session_state.quiz = init_quiz(unit_choice, topic_choice)
-    st.rerun()
+unit_choice = st.selectbox("Choose a unit:", list(units.keys()))
+
+if mode == "Topic Quiz":
+    topic_choice = st.selectbox("Choose a topic:", list(units[unit_choice].keys()))
+    if st.button("Generate New Quiz"):
+        st.session_state.quiz = init_quiz(unit_choice, topic_choice)
+        st.rerun()
+else:
+    st.caption("Generates 10 questions — at least one from every generator in the unit.")
+    if st.button("Generate Topic Test"):
+        st.session_state.quiz = {
+            "unit": unit_choice,
+            "topic": f"{unit_choice} Topic Test",
+            "questions": generate_topic_test(unit_choice),
+            "index": 0,
+            "score": 0,
+            "submitted": {},
+            "scenario_results": [],
+            "current_scenario": None,
+            "completed": False,
+            "wrong_answers": [],
+        }
+        st.rerun()
 
 if "quiz" not in st.session_state:
     st.session_state.quiz = init_quiz(
@@ -233,7 +309,33 @@ quiz = st.session_state.quiz
 
 if quiz["completed"]:
     st.subheader("Quiz Complete 🎉")
-    st.write(f"Score: {quiz['score']}")
+    total = sum(
+        len(q) if isinstance(q, list) else 1
+        for q in quiz["questions"]
+    )
+    st.write(f"Score: {quiz['score']} / {total}")
+
+    wrong = quiz.get("wrong_answers", [])
+    if wrong:
+        st.markdown("---")
+        st.subheader("Review: Incorrect Answers")
+        for entry in wrong:
+            label = entry["question_number"]
+            with st.expander(f"Q{label} — {entry['question']}"):
+                st.error(f"Your answer: {entry['your_answer']}")
+                st.success(f"Correct answer: {entry['correct_answer']}")
+                if entry.get("mistake"):
+                    st.warning(f"Key issue: {entry['mistake']}")
+                if entry.get("summary"):
+                    st.info(entry["summary"])
+                st.markdown("**Working:**")
+                for step in entry.get("working", []):
+                    if step["type"] == "latex":
+                        st.latex(step["content"])
+                    else:
+                        st.write(step["content"])
+    else:
+        st.success("Perfect score — no incorrect answers to review!")
 
     st.stop()
 
@@ -324,8 +426,16 @@ if isinstance(current_item, list):
         st.divider()
 
     if st.button("Next Scenario"):
+        if quiz["current_scenario"]:
+            for result in quiz["current_scenario"]["results"]:
+                if not result["correct"]:
+                    quiz["wrong_answers"].append({
+                        "question_number": f"Scenario {result['scenario'] + 1}, Part {result['part']}",
+                        **{k: result[k] for k in ("question", "your_answer", "correct_answer", "summary", "mistake", "working", "correct")}
+                    })
         quiz["index"] += 1
         quiz["submitted"] = {}
+        quiz["current_scenario"] = None
 
         if quiz["index"] >= len(quiz["questions"]):
             quiz["completed"] = True

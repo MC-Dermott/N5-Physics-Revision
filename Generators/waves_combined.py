@@ -9,6 +9,7 @@ Three question types:
 import random
 import math
 from utils.mcq_utils import format_mcq
+from utils.notes import NOTES
 
 V_SOUND = 340  # m/s
 
@@ -164,7 +165,8 @@ def make_find_v_mcq():
          "working": working},
     ]
 
-    return format_mcq(question, correct_v, options_data, "m/s")
+    return format_mcq(question, correct_v, options_data, "m/s",
+                      scaffold=[], notes=NOTES["waves_speed"])
 
 
 # =========================================================
@@ -231,7 +233,8 @@ def make_find_lam_mcq():
          "working": working},
     ]
 
-    return format_mcq(question, correct_lam, options_data, "m")
+    return format_mcq(question, correct_lam, options_data, "m",
+                      scaffold=[], notes=NOTES["waves_speed"])
 
 
 # =========================================================
@@ -312,7 +315,8 @@ def make_find_T_mcq():
          "summary": "Incorrect.", "mistake": d3_mistake, "working": working},
     ]
 
-    return format_mcq(question, T_disp, options_data, T_unit)
+    return format_mcq(question, T_disp, options_data, T_unit,
+                      scaffold=[], notes=NOTES["waves_period"])
 
 
 # =========================================================

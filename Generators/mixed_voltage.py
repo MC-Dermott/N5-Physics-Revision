@@ -83,3 +83,13 @@ def generate_circuit_quiz():
         questions.append(formatted)
 
     return questions
+
+
+def generate_single_circuit_question():
+    all_generators = POTENTIAL_DIVIDER_GENERATORS + FIXED_5V_GENERATORS + PARALLEL_SERIES_GENERATORS
+    fn = random.choice(all_generators)
+    question, correct, options_data, unit, diagram, *rest = fn()
+    scaffold = rest[0] if rest else []
+    formatted = format_mcq(question, correct, options_data, unit, scaffold=scaffold, notes=NOTES["electricity_current"])
+    formatted["diagram"] = diagram
+    return formatted

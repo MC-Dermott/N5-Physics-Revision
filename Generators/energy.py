@@ -1,7 +1,5 @@
 import random
 
-from utils.mcq_utils import format_mcq
-
 
 # =========================================================
 # IMPORT QUESTION GENERATORS
@@ -85,14 +83,15 @@ def generate_energy_quiz():
     # =====================================
     for question_func in selected_generators:
 
-        raw_question = question_func()
-
-        formatted_question = format_mcq(
-            *raw_question
-        )
+        formatted_question = question_func()
 
         questions.append(
             formatted_question
         )
 
     return questions
+
+
+def generate_single_energy_question():
+    all_generators = GPE_GENERATORS + KE_GENERATORS + WORKDONE_GENERATORS
+    return random.choice(all_generators)()
